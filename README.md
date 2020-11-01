@@ -6,18 +6,15 @@ and used with permission.
 ## Motivation
 
 This project was created in the hope to add additional functionality directly to JavaFX to address
-a few of its rough edges. Specifically:
+a few of its rough edges. Mainly:
 
-- Bindings#select, which allows to create bindings to nested properties.  The current implementation
+- Type-safe `Bindings#select` functionality, which allows to create bindings to nested properties.  The current implementation
 is not type safe and does not offer much flexibility to customize the binding.
-
-- Creating bindings to long lived properties (like those part of a model) can easily lead to unintended
-memory leaks.
 
 The project purposely contains only a small well defined subset of code adapted from ReactFX with the goal
 of making the project easier to evaluate for potential inclusion into JavaFX.  Direct inclusion would
 offer major advantages by adding default methods to the `ObservableValue` and `Binding` interfaces making
-classes that implement these interfaces act more like `Optional`s would:
+classes that implement these interfaces act more like `Optional`'s would:
 
     Binding<String> quotedTitleText = model.titleProperty()
         .map(text -> "'" + text "'");  // new `map` method on `Binding`
