@@ -1,4 +1,4 @@
-# EventStreams for JavaFX
+# Streams for JavaFX
 
 Based on the work by Tomas Mikula's excellent ReactFX project (https://github.com/TomasMikula/ReactFX)
 and used with permission.
@@ -70,50 +70,17 @@ The method however is not type safe.  A mistake in one of the string parameters 
 method will lead to errors at runtime.  It will also complain about `null` values and map them to some
 standard value.
 
-#### Alternative solution using EventStreams
+#### Alternative solution using Streams
 
-With EventStreams we can create the same binding in a type-safe manner:
+With streams we can create the same binding in a type-safe manner:
 
-        Binding<Boolean> treeShowing = EventStreams.valuesOf(node.sceneProperty())
-            .filter(Objects::nonNull)
-            .flatMap(s -> EventStreams.valuesOf(s.windowProperty()))
-            .filter(Objects::nonNull)
-            .flatMap(w -> EventStreams.valuesOf(w.showingProperty()))
-            .toBinding(false);
+        Binding<Boolean> treeShowing = Values.of(node.sceneProperty())
+            .flatMap(s -> Values.of(s.windowProperty()))
+            .flatMap(w -> Values.of(w.showingProperty()))
+            .orElse(false)
+            .toBinding();
 
-This is still pretty cumbersome, but a lot less so than the type-safe solution used in the `Node` example.
-
-#### Integration into JavaFX
-
-EventStreams can be used as-is, but they could also be fully integrated into JavaFX itself.  This
-would involve adding a new `stream` method to the `ObservableValue` interface in JavaFX.  Any 
-`ObservableValue` would then easily gain access to the familair methods from `Stream` and `Optional`:
-`map`, `flatMap` and `filter`.
-
-The above example could then look like this:
-
-        Binding<Boolean> treeShowing = node.sceneProperty().stream()
-            .filter(Objects::nonNull)
-            .flatMap(s -> s.windowProperty().stream()))
-            .filter(Objects::nonNull)
-            .flatMap(w -> w.showingProperty().stream()))
-            .toBinding(false);
-
-A further enhancement would be to add the `map`, `flatMap` and `filter` methods directly on
-`Binding`.  These would be implemented simply as:
-
-        default <U> Binding<U> map(Function<? super T, ? extends U> f) {
-            return EventStreams.valuesOf(this).map(f).toBinding(null);
-        }
-
-You could then write the above example simply as:
-
-        Binding<Boolean> treeShowing = node.sceneProperty()
-            .filter(Objects::nonNull)
-            .flatMap(Scene::windowProperty)
-            .filter(Objects::nonNull)
-            .flatMap(Window::showingProperty)
-            .orElse(false);
+This is far less cumbersome and still 100% type safe.
 
 ### Preventing memory leaks
 
@@ -166,7 +133,7 @@ Unfortunately, this is somewhat involved as there is no easy property one can li
 for `Scene` changes, check which `Window` it is associated with and then bind to  `Window::showingProperty`
 -- and update these listeners if the scene or window changes.
 
-With EventStreams one could safely bind a UI property to a model only when the UI is visible:
+With Streams one could safely bind a UI property to a model only when the UI is visible:
 
     model.selectedItemProperty()
         .conditionOn(isShowing)
@@ -174,12 +141,11 @@ With EventStreams one could safely bind a UI property to a model only when the U
 
 Where the `isShowing` variable can be created like this:
 
-    Binding<Boolean> isShowing = listView.sceneProperty()
-        .filter(Objects::nonNull)
-        .flatMap(Scene::windowProperty)
-        .filter(Objects::nonNull)
-        .flatMap(Window::showingProperty)
-        .orElse(false);
+    Binding<Boolean> isShowing = Values.of(listView.sceneProperty())
+        .flatMap(s -> Values.of(s.windowProperty()))
+        .flatMap(w -> Values.of(w.showingProperty()))
+        .orElse(false)
+        .toBinding();
 
 Or with a small helper class, which only needs the `Node` involved as a parameter:
 
@@ -189,5 +155,25 @@ Or with a small helper class, which only needs the `Node` involved as a paramete
 
 The above binding to `model.selectedItemProperty()` will only be present while `listView` is
 showing.  If the list view is hidden, the listener is unregistered, and if it is shown again
-the listener is re-added.  If the UI is hidden and no longer referenced, it will instantly stop
-reacting to any changes in the model and will eventually be garbage collected.
+the listener is re-added.  If the UI is hidden, it will instantly stop reacting to any 
+changes in the model and (if also no longer referenced) will eventually be garbage collected.
+
+## Overview
+
+WIP...
+
+Streams distinguish between
+- Stateful streams (ones based on values or with a default value)
+- Stateless streams (ephemeral)
+
+Difference is that a stateful stream will emit a value on subscribe or when a condition 
+operator becomes true again.  This is only possible if a value can be emitted from the
+stream on demand, like values from a property (the property holds the current value can
+be emitted to a new subscriber or when a condition becomes true again).
+
+A stateless stream (like invalidations or changes) does not emit anything upon
+subscription as there is no source that holds a current value.  A stateless stream can
+be made stateful with `withDefaultEvent`.
+
+ReactFX will do this slightly differently; it won't give the default (or current value)
+to a second subscriber of a stream, only to the first.  This can be somewhat confusing.

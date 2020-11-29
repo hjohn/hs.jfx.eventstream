@@ -1,4 +1,7 @@
-package hs.jfx.eventstream;
+package hs.jfx.eventstream.impl;
+
+import hs.jfx.eventstream.Subscription;
+import hs.jfx.eventstream.ValueStream;
 
 import java.util.Objects;
 
@@ -6,14 +9,14 @@ import javafx.beans.binding.Binding;
 import javafx.beans.value.ObservableValueBase;
 import javafx.collections.ObservableList;
 
-class StreamBinding<T> extends ObservableValueBase<T> implements Binding<T> {
+public class ValueStreamBinding<T> extends ObservableValueBase<T> implements Binding<T> {
     private final Subscription subscription;
     private T value;
 
-    StreamBinding(EventStream<T> input, T initialValue) {
-        value = initialValue;
-        subscription = Objects.requireNonNull(input).subscribe(evt -> {
-            value = evt;
+    public ValueStreamBinding(ValueStream<T> input) {
+        value = Objects.requireNonNull(input).getCurrentValue();
+        subscription = input.subscribe(v -> {
+            value = v;
             fireValueChangedEvent();
         });
     }
