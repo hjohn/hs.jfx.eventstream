@@ -1,7 +1,10 @@
 package hs.jfx.eventstream;
 
+import hs.jfx.eventstream.domain.Emitter;
+import hs.jfx.eventstream.domain.InvalidationStream;
+import hs.jfx.eventstream.domain.ObservableStream;
+import hs.jfx.eventstream.domain.Subscription;
 import hs.jfx.eventstream.impl.BaseInvalidationStream;
-import hs.jfx.eventstream.impl.Emitter;
 import hs.jfx.eventstream.impl.InvalidationAction;
 
 import javafx.beans.InvalidationListener;
@@ -18,7 +21,7 @@ public class Invalidations {
   public static InvalidationStream of(Observable... observables) {
     return new BaseInvalidationStream(null, new InvalidationAction() {
       @Override
-      public Subscription observeInputs(hs.jfx.eventstream.ObservableStream<Void> source, Emitter<Void> emitter) {
+      public Subscription observeInputs(ObservableStream<Void> source, Emitter<Void> emitter) {
         InvalidationListener listener = obs -> emitter.emit(null);
 
         for(Observable observable : observables) {

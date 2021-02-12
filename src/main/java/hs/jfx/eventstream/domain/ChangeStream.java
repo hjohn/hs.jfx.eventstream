@@ -1,14 +1,5 @@
-package hs.jfx.eventstream;
+package hs.jfx.eventstream.domain;
 
-import hs.jfx.eventstream.impl.DefaultStream;
-import hs.jfx.eventstream.impl.FilterStream;
-import hs.jfx.eventstream.impl.FlatMapStream;
-import hs.jfx.eventstream.impl.MapStream;
-import hs.jfx.eventstream.impl.PeekStream;
-import hs.jfx.eventstream.impl.TransactionalStream;
-import hs.jfx.eventstream.util.StreamUtil;
-
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -40,9 +31,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param predicate a {@link Predicate} which values must match to be emitted, cannot be null
    * @return a {@link ChangeStream} which only emits values matching the given predicate, never null
    */
-  default ChangeStream<T> filter(Predicate<T> predicate) {
-    return new FilterStream<>(this, predicate);
-  }
+  ChangeStream<T> filter(Predicate<T> predicate);
 
   // TODO offer toBinding here as well, but with the default?
   // TODO better name?  whenEmpty?  whenLazy?  toValueStream?  eager?
@@ -66,9 +55,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param defaultValueSupplier a {@link Supplier} which supplies the value to emit as default value for new subscribers
    * @return a {@link ValueStream} which uses the given defaultValueSupplier to provide its default value, never null
    */
-  default ValueStream<T> withDefaultGet(Supplier<T> defaultValueSupplier) {
-    return new DefaultStream<>(this, defaultValueSupplier);
-  }
+  ValueStream<T> withDefaultGet(Supplier<T> defaultValueSupplier);
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
@@ -78,9 +65,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param mapper a {@link Function} which converts a source value to a new value to emit, cannot be null
    * @return a {@link ChangeStream} which emits values converted by the given mapper function, never null
    */
-  default <U> ChangeStream<U> map(Function<? super T, ? extends U> mapper) {
-    return new MapStream.Change<>(this, mapper, StreamUtil.nullSupplier());
-  }
+  <U> ChangeStream<U> map(Function<? super T, ? extends U> mapper);
 
   // let docs reflect that a flatmap on a change stream means changing of streams, but not emitting current value of destination stream!
 
@@ -92,13 +77,9 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param mapper a {@link Function} which returns an alternative stream for each value this stream emits, cannot be null
    * @return a {@link ChangeStream} which obtains a new stream supplied by mapper and keeps emitting its values, never null
    */
-  default <U> ChangeStream<U> flatMap(Function<? super T, ? extends ChangeStream<? extends U>> mapper) {
-    return new FlatMapStream.Change<>(this, mapper, Changes::empty);
-  }
+  <U> ChangeStream<U> flatMap(Function<? super T, ? extends ChangeStream<? extends U>> mapper);
 
-  default ChangeStream<T> peek(Consumer<? super T> sideEffect) {
-    return new PeekStream.Change<>(this, sideEffect);
-  }
+  ChangeStream<T> peek(Consumer<? super T> sideEffect);
 
   // In case the value supplied by this stream is null, feed values from supplied stream
   /**
@@ -111,11 +92,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @return a {@link ChangeStream} which emits values from this stream unless the value was <code>null</code>
    *         in which case it emits values from the supplied stream, never null
    */
-  default ChangeStream<T> or(Supplier<? extends ChangeStream<? extends T>> supplier) {
-    Objects.requireNonNull(supplier);
-
-    return new FlatMapStream.Change<>(this, v -> this, supplier);
-  }
+  ChangeStream<T> or(Supplier<? extends ChangeStream<? extends T>> supplier);
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
@@ -137,9 +114,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param valueSupplier a {@link Supplier} which supplies the value to emit instead of <code>null</code>
    * @return a {@link ChangeStream} with <code>null</code>s replaced with the value supplied by the given {@link Supplier}, never null
    */
-  default ChangeStream<T> orElseGet(Supplier<T> valueSupplier) {
-    return new MapStream.Change<>(this, Function.identity(), valueSupplier);
-  }
+  ChangeStream<T> orElseGet(Supplier<T> valueSupplier);
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
@@ -154,16 +129,8 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param condition a boolean {@link ObservableValue}, cannot be null
    * @return a {@link ChangeStream} which only subscribes to its source stream when the given {@link ObservableValue} is true, never null
    */
-  default ChangeStream<T> conditionOn(ObservableValue<Boolean> condition) {
-    return Values.of(condition).flatMapToChange(c -> c ? this : Changes.empty());
-  }
+  ChangeStream<T> conditionOn(ObservableValue<Boolean> condition);
 
-  default ChangeStream<T> transactional() {
-    return new TransactionalStream.Change<>(this);
-  }
-
-//  @Override
-//  default T getCurrentValue() {
-//    return BaseStream.nullEvent();
-//  }
+  // Experimental
+  ChangeStream<T> transactional();
 }

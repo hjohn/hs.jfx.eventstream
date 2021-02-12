@@ -1,9 +1,11 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.ChangeStream;
-import hs.jfx.eventstream.ObservableStream;
-import hs.jfx.eventstream.Subscription;
-import hs.jfx.eventstream.ValueStream;
+import hs.jfx.eventstream.domain.Action;
+import hs.jfx.eventstream.domain.ChangeStream;
+import hs.jfx.eventstream.domain.Emitter;
+import hs.jfx.eventstream.domain.ObservableStream;
+import hs.jfx.eventstream.domain.Subscription;
+import hs.jfx.eventstream.domain.ValueStream;
 
 import java.util.Objects;
 import java.util.function.Function;

@@ -1,7 +1,7 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.ObservableStream;
-import hs.jfx.eventstream.Subscription;
+import hs.jfx.eventstream.domain.ObservableStream;
+import hs.jfx.eventstream.domain.Subscription;
 import hs.jfx.eventstream.util.ListHelper;
 
 import java.util.Iterator;

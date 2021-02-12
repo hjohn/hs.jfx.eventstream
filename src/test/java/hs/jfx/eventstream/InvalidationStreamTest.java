@@ -1,5 +1,6 @@
 package hs.jfx.eventstream;
 
+import hs.jfx.eventstream.domain.Subscription;
 import hs.jfx.eventstream.util.Sink;
 
 import java.util.List;

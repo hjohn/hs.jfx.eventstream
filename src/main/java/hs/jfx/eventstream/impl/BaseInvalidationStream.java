@@ -1,10 +1,15 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.InvalidationStream;
-import hs.jfx.eventstream.ObservableStream;
-import hs.jfx.eventstream.Subscription;
+import hs.jfx.eventstream.domain.Action;
+import hs.jfx.eventstream.domain.ChangeStream;
+import hs.jfx.eventstream.domain.InvalidationStream;
+import hs.jfx.eventstream.domain.ObservableStream;
+import hs.jfx.eventstream.domain.Subscription;
+import hs.jfx.eventstream.domain.ValueStream;
 
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Base class for event streams.
@@ -28,5 +33,22 @@ public class BaseInvalidationStream extends BaseObservableStream<Void> implement
   @Override
   protected final void sendInitialEvent(Consumer<? super Void> observer) {
     // Invalidation Streams donot send an initial event
+  }
+
+  @Override
+  public <T> ChangeStream<T> replace(Supplier<? extends T> supplier) {
+    Objects.requireNonNull(supplier);
+
+    return new MapStream.Change<>(this, v -> supplier.get(), supplier);
+  }
+
+  @Override
+  public ValueStream<Void> withDefault() {
+    return new DefaultStream<>(this, () -> null);
+  }
+
+  @Override
+  public InvalidationStream transactional() {
+    return new TransactionalStream.Invalidation(this);
   }
 }

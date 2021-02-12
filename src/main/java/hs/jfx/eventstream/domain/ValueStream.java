@@ -1,14 +1,5 @@
-package hs.jfx.eventstream;
+package hs.jfx.eventstream.domain;
 
-import hs.jfx.eventstream.impl.FilterStream;
-import hs.jfx.eventstream.impl.FlatMapStream;
-import hs.jfx.eventstream.impl.MapStream;
-import hs.jfx.eventstream.impl.PeekStream;
-import hs.jfx.eventstream.impl.TransactionalStream;
-import hs.jfx.eventstream.impl.ValueStreamBinding;
-import hs.jfx.eventstream.util.StreamUtil;
-
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -31,17 +22,11 @@ import javafx.beans.value.ObservableValue;
 // allows or on subscription, so it is still possible to get nothing on initial subscription
 public interface ValueStream<T> extends ObservableStream<T> {
 
-  default ChangeStream<T> filter(Predicate<? super T> filter) {
-    return new FilterStream<>(this, filter);
-  }
+  ChangeStream<T> filter(Predicate<? super T> filter);
 
-  default <U> ValueStream<U> map(Function<? super T, ? extends U> mapper) {
-    return new MapStream.Value<>(this, mapper, StreamUtil.nullSupplier());
-  }
+  <U> ValueStream<U> map(Function<? super T, ? extends U> mapper);
 
-  default Binding<T> toBinding() {
-    return new ValueStreamBinding<>(this);
-  }
+  Binding<T> toBinding();
 
   // When you have a ValueStream, lets say it contains 1 or 2 or 3.
   // And you flatmap this to one of 3 event streams: clicks, double clicks, triple clicks
@@ -50,32 +35,18 @@ public interface ValueStream<T> extends ObservableStream<T> {
   // So question is: should you be allowed to flatmap to a ChangeStream?
   // Can, but it will become a ChangeStream (similar to filter)
   // Method erasure will be same though, so would need 2 names or have a method that converts to ChangeStream (withoutDefault?)
-  default <U> ValueStream<U> flatMap(Function<? super T, ? extends ValueStream<? extends U>> mapper) {
-    return new FlatMapStream.Value<>(this, mapper, () -> Values.constant((U)null));
-  }
+  <U> ValueStream<U> flatMap(Function<? super T, ? extends ValueStream<? extends U>> mapper);
 
   // Convienence function...
-  default <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper) {
-    Objects.requireNonNull(mapper);
+  <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper);
 
-    return new FlatMapStream.Value<>(this, v -> Values.of(mapper.apply(v)), () -> Values.constant((U)null));
-  }
+  <U> ChangeStream<U> flatMapToChange(Function<? super T, ? extends ChangeStream<? extends U>> mapper);
 
-  default <U> ChangeStream<U> flatMapToChange(Function<? super T, ? extends ChangeStream<? extends U>> mapper) {
-    return new FlatMapStream.Change<>(this, mapper, Changes::empty);
-  }
+  ValueStream<T> peek(Consumer<? super T> sideEffect);
 
-  default ValueStream<T> peek(Consumer<? super T> sideEffect) {
-    return new PeekStream.Value<>(this, sideEffect);
-  }
+  ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier);
 
-  default ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier) {
-    return new FlatMapStream.Value<>(this, v -> this, supplier);
-  }
-
-  default ValueStream<T> orElse(T value) {
-    return new MapStream.Value<>(this, Function.identity(), () -> value);
-  }
+  ValueStream<T> orElse(T value);
 
   /**
    * Returns a new {@linkplain EventStream} that only observes this
@@ -92,13 +63,9 @@ public interface ValueStream<T> extends ObservableStream<T> {
    * @param condition a condition, cannot be null
    * @return a new event stream which only observes this stream when {@code condition} is {@code true}
    */
-  default ValueStream<T> conditionOn(ObservableValue<Boolean> condition) {
-    return Values.of(condition).flatMap(c -> c ? this : Values.empty());  // TODO constant???
-  }
+  ValueStream<T> conditionOn(ObservableValue<Boolean> condition);
 
-  default ValueStream<T> transactional() {
-    return new TransactionalStream.Value<>(this);
-  }
+  ValueStream<T> transactional();
 
   /**
    * Returns the value a new subscriber will receive immediately upon subscribing to

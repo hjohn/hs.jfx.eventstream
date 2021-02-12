@@ -1,6 +1,6 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.util.ChangeSource;
+import hs.jfx.eventstream.ChangeSource;
 import hs.jfx.eventstream.util.Sink;
 
 import org.junit.jupiter.api.Test;

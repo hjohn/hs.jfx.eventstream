@@ -1,5 +1,8 @@
 package hs.jfx.eventstream;
 
+import hs.jfx.eventstream.domain.ChangeStream;
+import hs.jfx.eventstream.domain.ValueStream;
+
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestUtil {

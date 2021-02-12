@@ -1,4 +1,6 @@
-package hs.jfx.eventstream;
+package hs.jfx.eventstream.experimental;
+
+import hs.jfx.eventstream.domain.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;

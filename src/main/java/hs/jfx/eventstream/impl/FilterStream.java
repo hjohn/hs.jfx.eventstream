@@ -1,7 +1,9 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.ObservableStream;
-import hs.jfx.eventstream.Subscription;
+import hs.jfx.eventstream.domain.ChangeAction;
+import hs.jfx.eventstream.domain.Emitter;
+import hs.jfx.eventstream.domain.ObservableStream;
+import hs.jfx.eventstream.domain.Subscription;
 
 import java.util.Objects;
 import java.util.function.Predicate;

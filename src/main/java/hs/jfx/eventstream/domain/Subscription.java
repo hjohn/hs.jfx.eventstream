@@ -1,8 +1,8 @@
-package hs.jfx.eventstream;
+package hs.jfx.eventstream.domain;
 
 /**
- * Represents a subscription to an event stream, which can be used to
- * cancel the subscription.
+ * Represents a subscription to a stream, which can be used to
+ * later cancel the subscription.
  */
 public interface Subscription {
     static final Subscription EMPTY = () -> {};

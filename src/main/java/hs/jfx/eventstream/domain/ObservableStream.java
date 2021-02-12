@@ -1,4 +1,4 @@
-package hs.jfx.eventstream;
+package hs.jfx.eventstream.domain;
 
 import java.util.function.Consumer;
 

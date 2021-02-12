@@ -1,8 +1,7 @@
 package hs.jfx.eventstream;
 
-import hs.jfx.eventstream.impl.Action;
-import hs.jfx.eventstream.impl.BaseValueStream;
-import hs.jfx.eventstream.impl.Emitter;
+import hs.jfx.eventstream.domain.ValueStream;
+import hs.jfx.eventstream.impl.RootValueStream;
 
 import javafx.beans.value.ObservableValue;
 
@@ -22,7 +21,7 @@ public class Values {
    * @return a {@link ValueStream} which uses the given {@link ObservableValue} as source, never null
    */
   public static <T> ValueStream<T> of(ObservableValue<T> observable) {
-    return Changes.of(observable).withDefaultGet(observable::getValue);
+    return RootValueStream.of(observable);
   }
 
   /**
@@ -34,26 +33,6 @@ public class Values {
    * @return a {@link ValueStream} which emits the given value exactly once upon each subscription, never null
    */
   public static <T> ValueStream<T> constant(T value) {
-    return Changes.<T>empty().withDefault(value);
-  }
-
-  public static <T> ValueStream<T> empty() {
-    return new BaseValueStream<>(null, new Action<T, T>() {
-
-      @Override
-      public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
-        return Subscription.EMPTY;
-      }
-
-      @Override
-      public T operate(T value) {
-        throw new UnsupportedOperationException();
-      }
-    }) {
-      @Override
-      public T getCurrentValue() {
-        return nullEvent();
-      }
-    };
+    return RootValueStream.constant(value);
   }
 }
