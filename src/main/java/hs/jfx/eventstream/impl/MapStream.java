@@ -1,6 +1,6 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 
 import java.util.Objects;
@@ -10,13 +10,13 @@ import java.util.function.Supplier;
 public abstract class MapStream {
 
   public static class Change<S, T> extends BaseChangeStream<S, T> {
-    public Change(Observable<S> source, Function<? super S, ? extends T> mapper, Supplier<? extends T> nullReplacement) {
+    public Change(ObservableStream<S> source, Function<? super S, ? extends T> mapper, Supplier<? extends T> nullReplacement) {
       super(source, new MapAction<>(mapper, nullReplacement));
     }
   }
 
   public static class Value<S, T> extends BaseValueStream<S, T> {
-    public Value(Observable<S> source, Function<? super S, ? extends T> mapper, Supplier<? extends T> nullReplacement) {
+    public Value(ObservableStream<S> source, Function<? super S, ? extends T> mapper, Supplier<? extends T> nullReplacement) {
       super(source, new MapAction<>(mapper, nullReplacement));
     }
   }
@@ -31,7 +31,7 @@ public abstract class MapStream {
     }
 
     @Override
-    public Subscription observeInputs(Observable<S> source, Emitter<T> emitter) {
+    public Subscription observeInputs(ObservableStream<S> source, Emitter<T> emitter) {
       return source.subscribe(value -> emitter.emit(operate(value)));
     }
 

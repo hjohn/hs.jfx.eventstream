@@ -1,6 +1,6 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 import hs.jfx.eventstream.ValueStream;
 
@@ -19,10 +19,10 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
     return (T)NULL_EVENT;
   }
 
-  private final Observable<S> source;
+  private final ObservableStream<S> source;
   private final Action<S, T> action;
 
-  public BaseValueStream(Observable<S> source, Action<S, T> action) {
+  public BaseValueStream(ObservableStream<S> source, Action<S, T> action) {
     this.source = source;
     this.action = action;
   }

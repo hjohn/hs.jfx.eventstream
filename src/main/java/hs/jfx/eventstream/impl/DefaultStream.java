@@ -1,6 +1,6 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 
 import java.util.Objects;
@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 public class DefaultStream<T> extends BaseValueStream<T, T> {
   private final Supplier<T> defaultValueSupplier;
 
-  public DefaultStream(Observable<T> source, Supplier<T> defaultValueSupplier) {
+  public DefaultStream(ObservableStream<T> source, Supplier<T> defaultValueSupplier) {
     super(Objects.requireNonNull(source), new DefaultAction<>());
 
     this.defaultValueSupplier = Objects.requireNonNull(defaultValueSupplier);
@@ -23,7 +23,7 @@ public class DefaultStream<T> extends BaseValueStream<T, T> {
   private static class DefaultAction<T> implements Action<T, T> {
 
     @Override
-    public Subscription observeInputs(Observable<T> source, Emitter<T> emitter) {
+    public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
       return source.subscribe(emitter::emit);
     }
 

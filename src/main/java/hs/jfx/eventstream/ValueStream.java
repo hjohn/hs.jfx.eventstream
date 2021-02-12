@@ -29,7 +29,7 @@ import javafx.beans.value.ObservableValue;
 
 // Should be described as emitting the most recent value immediately when condition
 // allows or on subscription, so it is still possible to get nothing on initial subscription
-public interface ValueStream<T> extends Observable<T> {
+public interface ValueStream<T> extends ObservableStream<T> {
 
   default ChangeStream<T> filter(Predicate<? super T> filter) {
     return new FilterStream<>(this, filter);

@@ -41,7 +41,7 @@ public class Values {
     return new BaseValueStream<>(null, new Action<T, T>() {
 
       @Override
-      public Subscription observeInputs(Observable<T> source, Emitter<T> emitter) {
+      public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
         return Subscription.EMPTY;
       }
 

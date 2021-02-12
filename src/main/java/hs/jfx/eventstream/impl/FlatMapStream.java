@@ -1,7 +1,7 @@
 package hs.jfx.eventstream.impl;
 
 import hs.jfx.eventstream.ChangeStream;
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 import hs.jfx.eventstream.ValueStream;
 
@@ -12,30 +12,30 @@ import java.util.function.Supplier;
 public abstract class FlatMapStream {
 
   public static class Change<T, U> extends BaseChangeStream<T, U> {
-    public Change(Observable<T> source, Function<? super T, ? extends ChangeStream<? extends U>> mapper, Supplier<? extends ChangeStream<? extends U>> nullReplacement) {
+    public Change(ObservableStream<T> source, Function<? super T, ? extends ChangeStream<? extends U>> mapper, Supplier<? extends ChangeStream<? extends U>> nullReplacement) {
       super(source, new FlatMapAction<>(mapper, nullReplacement));
     }
   }
 
   public static class Value<T, U> extends BaseValueStream<T, U> {
-    public Value(Observable<T> source, Function<? super T, ? extends ValueStream<? extends U>> mapper, Supplier<? extends ValueStream<? extends U>> nullReplacement) {
+    public Value(ObservableStream<T> source, Function<? super T, ? extends ValueStream<? extends U>> mapper, Supplier<? extends ValueStream<? extends U>> nullReplacement) {
       super(source, new FlatMapAction<>(mapper, nullReplacement));
     }
   }
 
   public static class FlatMapAction<T, U> implements Action<T, U> {
-    private final Function<? super T, ? extends Observable<? extends U>> mapper;
-    private final Supplier<? extends Observable<? extends U>> nullReplacement;
+    private final Function<? super T, ? extends ObservableStream<? extends U>> mapper;
+    private final Supplier<? extends ObservableStream<? extends U>> nullReplacement;
 
     private Subscription mappedSubscription = Subscription.EMPTY;
 
-    public FlatMapAction(Function<? super T, ? extends Observable<? extends U>> mapper, Supplier<? extends Observable<? extends U>> nullReplacement) {
+    public FlatMapAction(Function<? super T, ? extends ObservableStream<? extends U>> mapper, Supplier<? extends ObservableStream<? extends U>> nullReplacement) {
       this.mapper = Objects.requireNonNull(mapper);
       this.nullReplacement = Objects.requireNonNull(nullReplacement);
     }
 
     @Override
-    public Subscription observeInputs(Observable<T> source, Emitter<U> emitter) {
+    public Subscription observeInputs(ObservableStream<T> source, Emitter<U> emitter) {
       Subscription s = source.subscribe(t -> {
         mappedSubscription.unsubscribe();
         mappedSubscription = map(t).subscribe(emitter::emit);
@@ -56,7 +56,7 @@ public abstract class FlatMapStream {
       return mappedStream.getCurrentValue();
     }
 
-    private Observable<? extends U> map(T input) {
+    private ObservableStream<? extends U> map(T input) {
       return input == null ? nullReplacement.get() : mapper.apply(input);
     }
   }

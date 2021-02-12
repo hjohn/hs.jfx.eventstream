@@ -1,6 +1,6 @@
 package hs.jfx.eventstream.util;
 
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 import hs.jfx.eventstream.impl.BaseChangeStream;
 import hs.jfx.eventstream.impl.ChangeAction;
@@ -11,7 +11,7 @@ public class ChangeSource<T> extends BaseChangeStream<T, T> {
   public ChangeSource() {
     super(null, new ChangeAction<>() {
       @Override
-      public Subscription observeInputs(Observable<T> source, Emitter<T> emitter) {
+      public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
         return Subscription.EMPTY;
       }
     });

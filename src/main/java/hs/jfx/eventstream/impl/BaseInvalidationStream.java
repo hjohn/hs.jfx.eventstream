@@ -1,7 +1,7 @@
 package hs.jfx.eventstream.impl;
 
 import hs.jfx.eventstream.InvalidationStream;
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 
 import java.util.function.Consumer;
@@ -12,10 +12,10 @@ import java.util.function.Consumer;
  * @param <T> type of events emitted by this event stream
  */
 public class BaseInvalidationStream extends BaseObservableStream<Void> implements InvalidationStream {
-  private final Observable<Void> source;
+  private final ObservableStream<Void> source;
   private final Action<Void, Void> action;
 
-  public BaseInvalidationStream(Observable<Void> source, Action<Void, Void> action) {
+  public BaseInvalidationStream(ObservableStream<Void> source, Action<Void, Void> action) {
     this.source = source;
     this.action = action;
   }

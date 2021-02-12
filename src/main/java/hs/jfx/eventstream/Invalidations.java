@@ -18,7 +18,7 @@ public class Invalidations {
   public static InvalidationStream of(Observable... observables) {
     return new BaseInvalidationStream(null, new InvalidationAction() {
       @Override
-      public Subscription observeInputs(hs.jfx.eventstream.Observable<Void> source, Emitter<Void> emitter) {
+      public Subscription observeInputs(hs.jfx.eventstream.ObservableStream<Void> source, Emitter<Void> emitter) {
         InvalidationListener listener = obs -> emitter.emit(null);
 
         for(Observable observable : observables) {

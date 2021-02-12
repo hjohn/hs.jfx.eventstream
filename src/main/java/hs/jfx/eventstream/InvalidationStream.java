@@ -7,7 +7,7 @@ import hs.jfx.eventstream.impl.TransactionalStream;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public interface InvalidationStream extends Observable<Void> {
+public interface InvalidationStream extends ObservableStream<Void> {
 
   default <T> ChangeStream<T> replace(Supplier<? extends T> supplier) {
     Objects.requireNonNull(supplier);

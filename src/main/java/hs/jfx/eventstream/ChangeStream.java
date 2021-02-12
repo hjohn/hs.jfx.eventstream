@@ -31,7 +31,7 @@ import javafx.beans.value.ObservableValue;
  *
  * @param <T> the type of values the stream emits
  */
-public interface ChangeStream<T> extends Observable<T> {
+public interface ChangeStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,

@@ -1,6 +1,6 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 import hs.jfx.eventstream.util.ListHelper;
 
@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public abstract class BaseObservableStream<T> implements Observable<T> {
+public abstract class BaseObservableStream<T> implements ObservableStream<T> {
   private ListHelper<Consumer<? super T>> observers;
   private Subscription inputSubscription;
 

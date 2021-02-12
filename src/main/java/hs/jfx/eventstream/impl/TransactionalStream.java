@@ -1,25 +1,25 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 import hs.jfx.eventstream.Transactions;
 
 public abstract class TransactionalStream {
 
   public static class Invalidation extends BaseInvalidationStream {
-    public Invalidation(Observable<Void> source) {
+    public Invalidation(ObservableStream<Void> source) {
       super(source, new TransactionalAction<>());
     }
   }
 
   public static class Change<T> extends BaseChangeStream<T, T> {
-    public Change(Observable<T> source) {
+    public Change(ObservableStream<T> source) {
       super(source, new TransactionalAction<>());
     }
   }
 
   public static class Value<T> extends BaseValueStream<T, T> {
-    public Value(Observable<T> source) {
+    public Value(ObservableStream<T> source) {
       super(source, new TransactionalAction<>());
     }
   }
@@ -29,7 +29,7 @@ public abstract class TransactionalStream {
     private Subscription transactionFinishedSubscription;
 
     @Override
-    public Subscription observeInputs(Observable<T> source, Emitter<T> emitter) {
+    public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
       Subscription subscription = source.subscribe(t -> {
         if(!Transactions.inProgress()) {
           emitter.emit(t);

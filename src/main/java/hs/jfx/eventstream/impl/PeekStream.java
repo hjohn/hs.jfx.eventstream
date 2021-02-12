@@ -1,6 +1,6 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.Observable;
+import hs.jfx.eventstream.ObservableStream;
 import hs.jfx.eventstream.Subscription;
 
 import java.util.Objects;
@@ -9,13 +9,13 @@ import java.util.function.Consumer;
 public abstract class PeekStream {
 
     public static class Change<T> extends BaseChangeStream<T, T> {
-      public Change(Observable<T> source, Consumer<? super T> sideEffect) {
+      public Change(ObservableStream<T> source, Consumer<? super T> sideEffect) {
         super(source, new PeekAction<>(sideEffect));
       }
     }
 
     public static class Value<T> extends BaseValueStream<T, T> {
-      public Value(Observable<T> source, Consumer<? super T> sideEffect) {
+      public Value(ObservableStream<T> source, Consumer<? super T> sideEffect) {
         super(source, new PeekAction<>(sideEffect));
       }
     }
@@ -30,7 +30,7 @@ public abstract class PeekStream {
       }
 
       @Override
-      public Subscription observeInputs(Observable<T> source, Emitter<T> emitter) {
+      public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
         return source.subscribe(t -> {
           if(sideEffectInProgress) {
               throw new IllegalStateException("Side effect is not allowed to cause recursive event emission");
