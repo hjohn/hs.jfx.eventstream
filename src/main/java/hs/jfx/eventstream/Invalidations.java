@@ -1,10 +1,10 @@
 package hs.jfx.eventstream;
 
-import hs.jfx.eventstream.domain.Emitter;
 import hs.jfx.eventstream.domain.InvalidationStream;
 import hs.jfx.eventstream.domain.ObservableStream;
 import hs.jfx.eventstream.domain.Subscription;
 import hs.jfx.eventstream.impl.BaseInvalidationStream;
+import hs.jfx.eventstream.impl.Emitter;
 import hs.jfx.eventstream.impl.InvalidationAction;
 
 import javafx.beans.InvalidationListener;

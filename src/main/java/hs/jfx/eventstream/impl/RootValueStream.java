@@ -1,7 +1,5 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.domain.Action;
-import hs.jfx.eventstream.domain.Emitter;
 import hs.jfx.eventstream.domain.ObservableStream;
 import hs.jfx.eventstream.domain.Subscription;
 import hs.jfx.eventstream.domain.ValueStream;

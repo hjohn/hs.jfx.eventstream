@@ -1,6 +1,5 @@
 package hs.jfx.eventstream.impl;
 
-import hs.jfx.eventstream.domain.Action;
 import hs.jfx.eventstream.domain.ChangeStream;
 import hs.jfx.eventstream.domain.InvalidationStream;
 import hs.jfx.eventstream.domain.ObservableStream;

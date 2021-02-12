@@ -1,4 +1,7 @@
-package hs.jfx.eventstream.domain;
+package hs.jfx.eventstream.impl;
+
+import hs.jfx.eventstream.domain.ObservableStream;
+import hs.jfx.eventstream.domain.Subscription;
 
 public interface Action<S, T> {
   Subscription observeInputs(ObservableStream<S> source, Emitter<T> emitter);
