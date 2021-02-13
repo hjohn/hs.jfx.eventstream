@@ -2,7 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.hjohn.jfx.eventstream/eventstream-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.hjohn.jfx.eventstream/eventstream-core)
 [![Build Status](https://github.com/hjohn/hs.jfx.eventstream/workflows/master/badge.svg)](https://github.com/hjohn/hs.jfx.eventstream/actions)
-[![Coverage Status](https://coveralls.io/repos/github/hjohn/hs.jfx.eventstream/badge.svg?branch=master)](https://coveralls.io/github/hjohn/hs.jfx.eventstream?branch=master)
+[![Coverage](https://codecov.io/gh/hjohn/hs.jfx.eventstream/branch/master/graph/badge.svg?token=QCNNRFYF98)](https://codecov.io/gh/hjohn/hs.jfx.eventstream)
 
 Based on the work by Tomas Mikula's excellent ReactFX project (https://github.com/TomasMikula/ReactFX)
 and used with permission.
