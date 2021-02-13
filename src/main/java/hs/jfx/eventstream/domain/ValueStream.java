@@ -108,14 +108,6 @@ public interface ValueStream<T> extends ObservableStream<T> {
 
   ValueStream<T> transactional();
 
-  /**
-   * Returns the value a new subscriber will receive immediately upon subscribing to
-   * this stream, also known as the current value of the stream.
-   *
-   * @return a value
-   */
-  T getCurrentValue();
-
   // Convienence function...
   <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper);
 }

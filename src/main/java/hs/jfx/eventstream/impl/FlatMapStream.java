@@ -50,8 +50,8 @@ public abstract class FlatMapStream {
 
     @Override
     public U operate(T value) {
-      @SuppressWarnings("unchecked")
-      ValueStream<U> mappedStream = (ValueStream<U>)map(value);
+      @SuppressWarnings("unchecked") // cast is save as operate is only called for ValueStreams
+      BaseValueStream<T, U> mappedStream = (BaseValueStream<T, U>)map(value);
 
       return mappedStream.getCurrentValue();
     }

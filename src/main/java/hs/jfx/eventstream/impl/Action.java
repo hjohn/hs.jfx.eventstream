@@ -5,6 +5,14 @@ import hs.jfx.eventstream.domain.Subscription;
 
 public interface Action<S, T> {
   Subscription observeInputs(ObservableStream<S> source, Emitter<T> emitter);
+
+  /**
+   * Used by {@code ValueStream} to determine the value to provide upon
+   * subscription.
+   *
+   * @param value a source value
+   * @return the resulting value
+   */
   T operate(S value);
 
   public static <T> Action<T, T> nothing() {

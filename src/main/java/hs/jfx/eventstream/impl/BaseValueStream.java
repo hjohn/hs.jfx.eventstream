@@ -50,11 +50,24 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
     }
   }
 
-  @Override
-  public T getCurrentValue() {
-    // Source is guaranteed to be a non-null ValueStream because the only way it could be something else is if its
-    // parent was a ChangeStream, which is only allowed for DefaultStream and that one overrides getCurrentValue...
-    S currentValue = ((ValueStream<S>)source).getCurrentValue();  // TODO could cast to BaseValueStream once all implementations inherit from that
+  /**
+   * Returns the value this stream supplies to new subscribers. This method
+   * must be overriden if the source is NOT an implementation of {@link BaseValueStream}.<p>
+   *
+   * Note that this method can return a special value {@link #NULL_EVENT} when
+   * this stream is not currently attached to its source.
+   *
+   * @return the value this stream supplies to new subscribers or the special {@link #NULL_EVENT}
+   */
+  protected T getCurrentValue() {
+
+    /*
+     * The source is guaranteed to be a non-null ValueStream because streams
+     * allowing a ChangeStream source for a ValueStream must override this method.
+     */
+
+    @SuppressWarnings("unchecked")
+    S currentValue = ((BaseValueStream<?, S>)source).getCurrentValue();
 
     return currentValue == NULL_EVENT ? nullEvent() : action.operate(currentValue);
   }
@@ -79,7 +92,6 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
     return new FlatMapStream.Value<>(this, mapper, () -> RootValueStream.constant((U)null));  // TODO check if this constant is correct
   }
 
-  // Convienence function...
   @Override
   public <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper) {
     Objects.requireNonNull(mapper);
@@ -112,7 +124,7 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
     return RootValueStream.of(condition).flatMap(c -> c ? this : RootValueStream.empty());  // TODO constant???
   }
 
-  // Experimental
+  // TODO Experimental
   @Override
   public ValueStream<T> transactional() {
     return new TransactionalStream.Value<>(this);
