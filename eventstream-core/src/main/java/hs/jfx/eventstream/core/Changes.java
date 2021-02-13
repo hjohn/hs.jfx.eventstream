@@ -33,7 +33,7 @@ public class Changes {
    */
   public static <T> ChangeStream<Change<T>> diff(ObservableValue<T> observable) {
     return RootChangeStream.of(emitter -> {
-      ChangeListener<T> listener = (obs, old, current) -> emitter.emit(new Change<>(old, current));
+      ChangeListener<T> listener = (obs, old, current) -> emitter.emit(Change.of(old, current));
 
       observable.addListener(listener);
 
