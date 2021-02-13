@@ -41,10 +41,9 @@ change occured.
 ### Null Handling
 
 In the earlier examples `null` was not explicitely handled in the `filter` or `map` functions. This is
-because these functions are null-safe. The functions are not called when the value is `null`, instead
-it is passed on to the next function in the chain.
-
-Streams offer functions like Java's `Optional` to deal with cases where a value is `null`:
+because these functions are null-safe. The functions are not called when the value emitted is `null`.
+In order to handle `null`s, streams offer similar functions to Java's `Optional` to deal with the case
+when `null` is emitted:
 
     Changes.of(button.textProperty())
         .map(String::toUpperCase)
@@ -56,10 +55,10 @@ needs to deal with it. For example, when creating a stream with several chained 
 checks can be omitted:
 
     Values.of(button.sceneProperty())
-        .flatMap(scene -> Values.of(scene.windowProperty()))     // scene can't be null :)
+        .flatMap(scene -> Values.of(scene.windowProperty()))     // scene won't be null :)
         .flatMap(window -> Values.of(window.showingProperty()))
         .orElse(false)  // deals with the case when either scene or window is null
-        .subscribe(showing -> System.out.println("button is " + (showing ? "showing" : "hidden")));
+        .subscribe(showing -> System.out.println("button showing is: " + showing));
 
 ### Stream Types
 

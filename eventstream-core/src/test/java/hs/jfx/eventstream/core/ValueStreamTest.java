@@ -2,7 +2,6 @@ package hs.jfx.eventstream.core;
 
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
-import hs.jfx.eventstream.core.Values;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -66,65 +65,6 @@ public class ValueStreamTest {
   }
 
   @Nested
-  class ConditionOn {
-
-    @Test
-    public void shouldEmitValuesConditionally() {
-      property.set("Bye");
-
-      BooleanProperty visible = new SimpleBooleanProperty(true);
-      ValueStream<String> stream = Values.of(property)
-        .conditionOn(visible);
-
-      stream.subscribe(strings::add);
-
-      assertEquals(List.of("Bye"), strings.drain());  // expect current value for new subscriber
-
-      visible.set(false);
-      property.set("Hello");
-
-      assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is false
-
-      stream.subscribe(strings::add);
-
-      assertEquals(List.of(), strings.drain());  // new subscriber gets nothing as condition is false
-
-      visible.set(true);
-      assertEquals(List.of("Hello", "Hello"), strings.drain());  // when condition becomes true, both subcribers immediately get notified
-
-      property.set("Hi");
-
-      assertEquals(List.of("Hi", "Hi"), strings.drain());  // both subscribers receive new changes while condition is true
-
-      stream.subscribe(strings::add);
-
-      assertEquals(List.of("Hi"), strings.drain());  // expect current value for new subscriber
-
-      property.set("World");
-
-      assertEquals(List.of("World", "World", "World"), strings.drain());  // all subscribers get current value
-    }
-
-    @Test
-    public void shouldEmitValuesWhenConditionBecomesTrue() {
-      property.set("Bye");
-
-      BooleanProperty visible = new SimpleBooleanProperty(false);
-      ValueStream<String> stream = Values.of(property)
-        .conditionOn(visible)
-        .map(String::toUpperCase);
-
-      stream.subscribe(strings::add);
-
-      assertEquals(List.of(), strings.drain());
-
-      visible.set(true);
-
-      assertEquals(List.of("BYE"), strings.drain());
-    }
-  }
-
-  @Nested
   class Constant {
 
     @Test
@@ -142,289 +82,390 @@ public class ValueStreamTest {
   }
 
   @Nested
-  class FilterOperation {
+  class IntermediateOperations {
 
-    @Test
-    void shouldSkipFilteredValues() {
-      property.set("Forever");  // Would match
+    @Nested
+    class ConditionOn {
 
-      Values.of(property)
-        .filter(s -> s.contains("o"))
-        .subscribe(strings::add);
+      @Test
+      public void shouldEmitValuesConditionally() {
+        property.set("Bye");
 
-      assertTrue(strings.isEmpty());  // Nothing is sent out as ChangeStreams donot emit on subscribe
+        BooleanProperty visible = new SimpleBooleanProperty(true);
+        ValueStream<String> stream = Values.of(property)
+          .conditionOn(visible);
 
-      property.set("Hello");
+        stream.subscribe(strings::add);
 
-      assertEquals(List.of("Hello"), strings.drain());
+        assertEquals(List.of("Bye"), strings.drain());  // expect current value for new subscriber
 
-      property.set("World");
+        visible.set(false);
+        property.set("Hello");
 
-      assertEquals(List.of("World"), strings.drain());
+        assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is false
 
-      property.set("Everything");  // doesn't match filter
+        stream.subscribe(strings::add);
 
-      assertTrue(strings.isEmpty());
-    }
+        assertEquals(List.of(), strings.drain());  // new subscriber gets nothing as condition is false
 
-    @Test
-    void shouldSkipNulls() {
-      Values.of(property)
-        .filter(TestUtil::filterFailOnNull)  // if it didn't skip nulls, this filter would hard error
-        .subscribe(strings::add);
+        visible.set(true);
+        assertEquals(List.of("Hello", "Hello"), strings.drain());  // when condition becomes true, both subcribers immediately get notified
 
-      assertTrue(strings.isEmpty());
-    }
+        property.set("Hi");
 
-    @Test
-    void shouldRejectNullPredicate() {
-      assertThrows(NullPointerException.class, () -> Values.of(property).filter(null));
-    }
-  }
+        assertEquals(List.of("Hi", "Hi"), strings.drain());  // both subscribers receive new changes while condition is true
 
-  @Nested
-  class FlatMapOperation {
-    private final Sink<Boolean> booleans = new Sink<>();
+        stream.subscribe(strings::add);
 
-    @Test
-    void shouldDelegateToSubstream() {
-      class TestWindow {
-        BooleanProperty showing = new SimpleBooleanProperty();
+        assertEquals(List.of("Hi"), strings.drain());  // expect current value for new subscriber
+
+        property.set("World");
+
+        assertEquals(List.of("World", "World", "World"), strings.drain());  // all subscribers get current value
       }
 
-      class TestScene {
-        ObjectProperty<TestWindow> window = new SimpleObjectProperty<>();
+      @Test
+      public void shouldEmitValuesWhenConditionBecomesTrue() {
+        property.set("Bye");
+
+        BooleanProperty visible = new SimpleBooleanProperty(false);
+        ValueStream<String> stream = Values.of(property)
+          .conditionOn(visible)
+          .map(String::toUpperCase);
+
+        stream.subscribe(strings::add);
+
+        assertEquals(List.of(), strings.drain());
+
+        visible.set(true);
+
+        assertEquals(List.of("BYE"), strings.drain());
+      }
+    }
+
+    @Nested
+    class Filter {
+
+      @Test
+      void shouldSkipFilteredValues() {
+        property.set("Forever");  // Would match
+
+        Values.of(property)
+          .filter(s -> s.contains("o"))
+          .subscribe(strings::add);
+
+        assertTrue(strings.isEmpty());  // Nothing is sent out as ChangeStreams donot emit on subscribe
+
+        property.set("Hello");
+
+        assertEquals(List.of("Hello"), strings.drain());
+
+        property.set("World");
+
+        assertEquals(List.of("World"), strings.drain());
+
+        property.set("Everything");  // doesn't match filter
+
+        assertTrue(strings.isEmpty());
       }
 
-      class TestNode {
-        ObjectProperty<TestScene> scene = new SimpleObjectProperty<>();
+      @Test
+      void shouldSkipNulls() {
+        Values.of(property)
+          .filter(TestUtil::filterFailOnNull)  // if it didn't skip nulls, this filter would hard error
+          .subscribe(strings::add);
+
+        assertTrue(strings.isEmpty());
       }
 
-      TestNode node = new TestNode();
-      TestScene scene = new TestScene();
-      TestWindow window = new TestWindow();
-
-      Subscription subscription = Values.of(node.scene)
-        .flatMap(s -> Values.of(s.window))
-        .flatMap(w -> Values.of(w.showing))
-        .orElse(false)
-        .subscribe(booleans::add);
-
-      // expect false as scene is null
-      assertEquals(List.of(false), booleans.drain());
-
-      scene.window.set(window);
-
-      // nothing expected, as node still has no scene
-      assertEquals(List.of(), booleans.drain());
-
-      node.scene.set(scene);
-
-      // node has a scene, scene has a window, and it is not showing, another value is emitted as scene changed
-      assertEquals(List.of(false), booleans.drain());
-
-      window.showing.set(true);
-
-      // it is showing now
-      assertEquals(List.of(true), booleans.drain());
-
-      TestWindow window2 = new TestWindow();
-
-      scene.window.set(window2);
-
-      // switched to a non-visible window
-      assertEquals(List.of(false), booleans.drain());
-
-      scene.window.set(window);
-
-      // switched back to visible window
-      assertEquals(List.of(true), booleans.drain());
-
-      window2.showing.set(true);
-      scene.window.set(window2);
-
-      // stream emits another value, because it has no notion of "current" value
-      assertEquals(List.of(true), booleans.drain());
-
-      node.scene.set(null);
-
-      // condition should revert to false
-      assertEquals(List.of(false), booleans.drain());
-
-      window.showing.set(false);
-
-      // changing an old dependency does not influence anything
-      assertEquals(List.of(), booleans.drain());
-
-      subscription.unsubscribe();
-
-      window2.showing.set(false);
-
-      // no change, the consumer was unsubcribed
-      assertEquals(List.of(), booleans.drain());
+      @Test
+      void shouldRejectNullPredicate() {
+        assertThrows(NullPointerException.class, () -> Values.of(property).filter(null));
+      }
     }
 
-    @Test
-    void shouldSkipNulls() {
-      Values.of(property)
-        .flatMap(TestUtil::valueFlatMapFailOnNull)
-        .subscribe(strings::add);
+    @Nested
+    class FlatMap {
+      private final Sink<Boolean> booleans = new Sink<>();
 
-      assertNull(strings.single());
-    }
-
-    @Test
-    void shouldRejectNullFunction() {
-      assertThrows(NullPointerException.class, () -> Values.of(property).flatMap(null));
-    }
-  }
-
-  @Nested
-  class MapOperation {
-
-    @Test
-    void shouldConvertValues() {
-      property.set("A");
-
-      Values.of(property)
-        .map(s -> "" + (int)s.charAt(0))
-        .subscribe(strings::add);
-
-      assertEquals(List.of("65"), strings.drain());
-    }
-
-    @Test
-    void shouldSkipNulls() {
-      Values.of(property)
-        .map(TestUtil::mapFailOnNull)
-        .subscribe(strings::add);
-
-      assertNull(strings.single());
-    }
-
-    @Test
-    void shouldRejectNullFunction() {
-      assertThrows(NullPointerException.class, () -> Values.of(property).map(null));
-    }
-  }
-
-  @Nested
-  class OrElseOperation {
-
-    @Test
-    void shouldReplaceNulls() {
-      Values.of(property)
-        .orElse("(null)")
-        .subscribe(strings::add);
-
-      assertEquals("(null)", strings.single());
-
-      property.set("A");
-
-      assertEquals("A", strings.single());
-
-      property.set(null);
-
-      assertEquals("(null)", strings.single());
-    }
-  }
-
-  @Nested
-  class PeekOperation {
-
-    @Test
-    void shouldConsumeStreamValues() {
-      Sink<String> peekedValues = new Sink<>();
-
-      ValueStream<String> eventStream = Values.of(property)
-        .peek(peekedValues::add);
-
-      property.set("Hello");
-      property.set("World");
-
-      assertEquals(List.of(), peekedValues.drain());  // no subscribers, so stream is not active
-
-      Subscription subscription = eventStream.subscribe(strings::add);
-
-      assertEquals(List.of("World"), peekedValues.drain());  // current value is eagerly emitted
-
-      property.set("!");
-
-      assertEquals(List.of("!"), peekedValues.drain());  // value change is picked up by peek function
-
-      subscription.unsubscribe();
-
-      assertEquals(List.of(), peekedValues.drain());  // no change
-
-      property.set("Goodbye");
-      property.set("Forever");
-
-      assertEquals(List.of(), peekedValues.drain());  // no change as stream is not in use
-
-      eventStream.subscribe(strings::add);
-
-      assertEquals(List.of("Forever"), peekedValues.drain());  // stream subscribed again, and immediately emits current value
-    }
-
-    @Test
-    void shouldNotAllowRecursiveEmission() {
-      property.set("Goodbye");
-
-      ValueStream<String> eventStream = Values.of(property);
-
-      Consumer<? super String> sideEffect = s -> {
-        if("Hello".equals(s)) {
-          property.set("World");
+      @Test
+      void shouldDelegateToSubstream() {
+        class TestWindow {
+          BooleanProperty showing = new SimpleBooleanProperty();
         }
-      };
 
-      eventStream.peek(sideEffect)
-        .subscribe(strings::add);
+        class TestScene {
+          ObjectProperty<TestWindow> window = new SimpleObjectProperty<>();
+        }
 
-      assertEquals(List.of("Goodbye"), strings.drain());
+        class TestNode {
+          ObjectProperty<TestScene> scene = new SimpleObjectProperty<>();
+        }
 
-      UncaughtExceptionHandler defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        TestNode node = new TestNode();
+        TestScene scene = new TestScene();
+        TestWindow window = new TestWindow();
 
-      try {
-        AtomicReference<Throwable> exception = new AtomicReference<>();
+        Subscription subscription = Values.of(node.scene)
+          .flatMap(s -> Values.of(s.window))
+          .flatMap(w -> Values.of(w.showing))
+          .orElse(false)
+          .subscribe(booleans::add);
 
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> exception.set(e));
+        // expect false as scene is null
+        assertEquals(List.of(false), booleans.drain());
 
-        property.set("Hello");  // triggers recursive change by peek function
+        scene.window.set(window);
 
-        assertEquals(IllegalStateException.class, exception.get().getClass());
-        assertEquals("Side effect is not allowed to cause recursive event emission", exception.get().getMessage());
+        // nothing expected, as node still has no scene
+        assertEquals(List.of(), booleans.drain());
+
+        node.scene.set(scene);
+
+        // node has a scene, scene has a window, and it is not showing, another value is emitted as scene changed
+        assertEquals(List.of(false), booleans.drain());
+
+        window.showing.set(true);
+
+        // it is showing now
+        assertEquals(List.of(true), booleans.drain());
+
+        TestWindow window2 = new TestWindow();
+
+        scene.window.set(window2);
+
+        // switched to a non-visible window
+        assertEquals(List.of(false), booleans.drain());
+
+        scene.window.set(window);
+
+        // switched back to visible window
+        assertEquals(List.of(true), booleans.drain());
+
+        window2.showing.set(true);
+        scene.window.set(window2);
+
+        // stream emits another value, because it has no notion of "current" value
+        assertEquals(List.of(true), booleans.drain());
+
+        node.scene.set(null);
+
+        // condition should revert to false
+        assertEquals(List.of(false), booleans.drain());
+
+        window.showing.set(false);
+
+        // changing an old dependency does not influence anything
+        assertEquals(List.of(), booleans.drain());
+
+        subscription.unsubscribe();
+
+        window2.showing.set(false);
+
+        // no change, the consumer was unsubcribed
+        assertEquals(List.of(), booleans.drain());
       }
-      finally {
-        Thread.setDefaultUncaughtExceptionHandler(defaultUncaughtExceptionHandler);
+
+      @Test
+      void shouldSkipNulls() {
+        Values.of(property)
+          .flatMap(TestUtil::valueFlatMapFailOnNull)
+          .subscribe(strings::add);
+
+        assertNull(strings.single());
+      }
+
+      @Test
+      void shouldRejectNullFunction() {
+        assertThrows(NullPointerException.class, () -> Values.of(property).flatMap(null));
       }
     }
 
-    @Test
-    void shouldRejectNullConsumer() {
-      assertThrows(NullPointerException.class, () -> Values.of(property).peek(null));
+    @Nested
+    class Map {
+
+      @Test
+      void shouldConvertValues() {
+        property.set("A");
+
+        Values.of(property)
+          .map(s -> "" + (int)s.charAt(0))
+          .subscribe(strings::add);
+
+        assertEquals(List.of("65"), strings.drain());
+      }
+
+      @Test
+      void shouldSkipNulls() {
+        Values.of(property)
+          .map(TestUtil::mapFailOnNull)
+          .subscribe(strings::add);
+
+        assertNull(strings.single());
+      }
+
+      @Test
+      void shouldRejectNullFunction() {
+        assertThrows(NullPointerException.class, () -> Values.of(property).map(null));
+      }
+    }
+
+    @Nested
+    class OrElse {
+
+      @Test
+      void shouldReplaceNulls() {
+        Values.of(property)
+          .orElse("(null)")
+          .subscribe(strings::add);
+
+        assertEquals("(null)", strings.single());
+
+        property.set("A");
+
+        assertEquals("A", strings.single());
+
+        property.set(null);
+
+        assertEquals("(null)", strings.single());
+      }
+
+      @Test
+      void shouldAllowReplaceWithNull() {
+        Values.of(property)
+          .orElse(null)
+          .orElse("(null)")
+          .subscribe(strings::add);
+
+        assertEquals("(null)", strings.single());
+
+        property.set("A");
+
+        assertEquals("A", strings.single());
+
+        property.set(null);
+
+        assertEquals("(null)", strings.single());
+      }
+    }
+
+    @Nested
+    class Peek {
+
+      @Test
+      void shouldConsumeStreamValues() {
+        Sink<String> peekedValues = new Sink<>();
+
+        ValueStream<String> eventStream = Values.of(property)
+          .peek(peekedValues::add);
+
+        property.set("Hello");
+        property.set("World");
+
+        assertEquals(List.of(), peekedValues.drain());  // no subscribers, so stream is not active
+
+        Subscription subscription = eventStream.subscribe(strings::add);
+
+        assertEquals(List.of("World"), peekedValues.drain());  // current value is eagerly emitted
+
+        property.set("!");
+
+        assertEquals(List.of("!"), peekedValues.drain());  // value change is picked up by peek function
+
+        subscription.unsubscribe();
+
+        assertEquals(List.of(), peekedValues.drain());  // no change
+
+        property.set("Goodbye");
+        property.set("Forever");
+
+        assertEquals(List.of(), peekedValues.drain());  // no change as stream is not in use
+
+        eventStream.subscribe(strings::add);
+
+        assertEquals(List.of("Forever"), peekedValues.drain());  // stream subscribed again, and immediately emits current value
+      }
+
+      @Test
+      void shouldNotAllowRecursiveEmission() {
+        property.set("Goodbye");
+
+        ValueStream<String> eventStream = Values.of(property);
+
+        Consumer<? super String> sideEffect = s -> {
+          if("Hello".equals(s)) {
+            property.set("World");
+          }
+        };
+
+        eventStream.peek(sideEffect)
+          .subscribe(strings::add);
+
+        assertEquals(List.of("Goodbye"), strings.drain());
+
+        UncaughtExceptionHandler defaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+
+        try {
+          AtomicReference<Throwable> exception = new AtomicReference<>();
+
+          Thread.setDefaultUncaughtExceptionHandler((t, e) -> exception.set(e));
+
+          property.set("Hello");  // triggers recursive change by peek function
+
+          assertEquals(IllegalStateException.class, exception.get().getClass());
+          assertEquals("Side effect is not allowed to cause recursive event emission", exception.get().getMessage());
+        }
+        finally {
+          Thread.setDefaultUncaughtExceptionHandler(defaultUncaughtExceptionHandler);
+        }
+      }
+
+      @Test
+      void shouldRejectNullConsumer() {
+        assertThrows(NullPointerException.class, () -> Values.of(property).peek(null));
+      }
     }
   }
 
   @Nested
-  class ToBinding {
+  class TerminalOperations {
+    @Nested
+    class Subscribe {
+      @Test
+      void shouldReceiveNull() {
+        ChangeSource<String> source = new ChangeSource<>();
 
-    @Test
-    void shouldTrackValuesEmittedInStream() {
-      Binding<String> binding = Values.of(property).toBinding();
+        source.withDefault("")
+          .subscribe(strings::add);
 
-      assertNull(binding.getValue());
-      assertTrue(binding.isValid());
+        assertEquals(List.of(""), strings.drain());
 
-      property.set("Hello");
+        source.push(null);
 
-      assertEquals("Hello", binding.getValue());
+        assertNull(strings.drain().get(0));
+      }
+    }
 
-      binding.dispose();
+    @Nested
+    class ToBinding {
 
-      property.set("World");
+      @Test
+      void shouldTrackValuesEmittedInStream() {
+        Binding<String> binding = Values.of(property).toBinding();
 
-      assertEquals("Hello", binding.getValue());  // unchanged as binding was disposed, resulting in it unsubscribing itself
+        assertNull(binding.getValue());
+        assertTrue(binding.isValid());
+
+        property.set("Hello");
+
+        assertEquals("Hello", binding.getValue());
+
+        binding.dispose();
+
+        property.set("World");
+
+        assertEquals("Hello", binding.getValue());  // unchanged as binding was disposed, resulting in it unsubscribing itself
+      }
     }
   }
 }

@@ -16,9 +16,10 @@ import javafx.beans.value.ObservableValue;
  * occur it is therefore possible that a subscription will never receive
  * a change.<p>
  *
- * The operations offered by this stream are null safe. Operations
- * accepting a {@link Function} or {@link Consumer} will never be given
- * a <code>null</code> value as input unless otherwise specified.<p>
+ * The intermediate operations offered by this stream are null safe.
+ * Intermediate operations will not be called when the stream emits
+ * <code>null</code> unless otherwise specified or specifically intended
+ * to handle <code>null</code>s.<p>
  *
  * This is a lazy stream, which means that it only observes its source
  * when it has observers of its own.  When there are no subscribers,
@@ -113,7 +114,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * which emits values from this stream but with <code>null</code>s
    * replaced with the given value.
    *
-   * @param value a value to emit instead of <code>null</code>
+   * @param value a value to emit instead of <code>null</code>, can be <code>null</code>
    * @return a {@link ChangeStream} with <code>null</code>s replaced with the given value, never null
    */
   default ChangeStream<T> orElse(T value) {
