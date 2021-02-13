@@ -17,7 +17,14 @@ time it changes:
     Changes.of(button.textProperty())
         .subscribe(System.out::println);
 
-The example can also be written with `Values.of`:
+A more sophisticated example may want to exclude certain values and convert the text to upper case:
+
+    Changes.of(button.textProperty())
+        .filter(text -> !text.contains("evil"))
+        .map(String::toUpperCase)
+        .subscribe(System.out::println);
+
+The examples can also be written with `Values.of`:
 
     Values.of(button.textProperty())
         .subscribe(System.out::println);
@@ -26,13 +33,6 @@ The differences between these two ways of creating a stream will be discussed in
 this document, but for now it is enough to know that a value stream will send the current value to
 a new subscriber immediately upon subscription, while a change stream will only do so when an actual
 change occured.
-
-A more sophisticated example may want to exclude certain values and convert the text to upper case:
-
-    Changes.of(button.textProperty())
-        .filter(text -> !text.contains("evil"))
-        .map(String::toUpperCase)
-        .subscribe(System.out::println);
 
 ### Null Handling
 
@@ -121,18 +121,39 @@ The following table shows which terminal operations are available for each strea
 
 ### Lazy Subscriptions
 
-Streams only subscribe to their source when a consumer is currently subscribed.
+Streams only observe their source when a consumer is currently subscribed.
 
     ValueStream<String> vs = Values.of(button.textProperty())
         .map(String::toUpperCase);
 
-In the above example, the button's text property is not subscribed until an actual subscriber
+In the above example, the button's text property is not observed until an actual subscriber
 is added to the stream:
 
     vs.subscribe(System.out::println);
 
-This is called lazy subscribing, and this helps to allow streams to be garbage collected
-when no longer used.
+Streams of this type are called lazy streams. All streams provided by this package are lazy
+and will only observe their source when needed. 
+
+As lazy streams will stop observing their source when they have no subscribers, the source
+stream will not prevent garbage collection when there are no more active subscribers. There
+is therefore no need to use weak listeners for observing the source stream.
+
+An advantage of this approach is that an example like below will function as one would
+expect, and will keep printing changes in `button.textProperty()`:
+
+    Values.of(button.textProperty())
+        .map(t -> t + "World")
+        .subscribe(System.out::println);
+
+Contrast this with JavaFX's standard binding mechanism which may garbage collect the binding
+at any time because of its use of weak listeners:
+
+    button.textProperty()
+        .concat("World")  // weak binding used here
+        .addListener((obs, old, current) -> System.out.println(current));
+
+This can be very surprising, especially when the `concat` function was added at a later stage,
+because that simple change will result in unexpected runtime behavior.
 
 ## Motivation
 
