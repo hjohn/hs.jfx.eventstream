@@ -34,7 +34,7 @@ public class ChangeStreamTest {
   class ConditionOn {
 
     @Test
-    public void shouldEmitValuesConditionally() {
+    void shouldEmitValuesConditionally() {
       property.set("Bye");
 
       BooleanProperty visible = new SimpleBooleanProperty(true);
