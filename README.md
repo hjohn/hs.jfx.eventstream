@@ -1,5 +1,8 @@
 # Streams for JavaFX
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.hjohn.jfx.eventstream/eventstream-core/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.hjohn.jfx.eventstream/eventstream-core)
+[![Build Status](https://github.com/hjohn/hs.jfx.eventstream/workflows/Java CI with Maven/badge.svg)](https://github.com/hjohn/hs.jfx.eventstream/actions)
+
 Based on the work by Tomas Mikula's excellent ReactFX project (https://github.com/TomasMikula/ReactFX)
 and used with permission.
 
