@@ -18,7 +18,11 @@ import javafx.beans.value.ObservableValue;
  *
  * The operations offered by this stream are null safe. Operations
  * accepting a {@link Function} or {@link Consumer} will never be given
- * a <code>null</code> value as input unless otherwise specified.
+ * a <code>null</code> value as input unless otherwise specified.<p>
+ *
+ * This is a lazy stream, which means that it only observes its source
+ * when it has observers of its own.  When there are no subscribers,
+ * this stream stop observing its source immediately.
  *
  * @param <T> the type of values the stream emits
  */
@@ -32,9 +36,6 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @return a {@link ChangeStream} which only emits values matching the given predicate, never null
    */
   ChangeStream<T> filter(Predicate<T> predicate);
-
-  // TODO offer toBinding here as well, but with the default?
-  // TODO better name?  whenEmpty?  whenLazy?  toValueStream?  eager?
 
   /**
    * Returns a {@link ValueStream}, using this stream as its source,
@@ -67,21 +68,34 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    */
   <U> ChangeStream<U> map(Function<? super T, ? extends U> mapper);
 
-  // let docs reflect that a flatmap on a change stream means changing of streams, but not emitting current value of destination stream!
-
   /**
-   * Returns a {@link ChangeStream}, using this stream as its source,
-   * which obtains a new stream supplied by mapper, each time this
-   * stream emits a value, and keeps emitting its values.
+   * Returns a {@link ChangeStream} which, each time this stream emits a value,
+   * obtains a new stream supplied by mapper and emits its values instead.<p>
+   *
+   * Note: ChangeStreams donot emit values eagerly, so when this stream
+   * emits a value, the stream being tracked changes but a value will
+   * only be emitted when that stream emits a value after tracking started.
+   * See also {@link ValueStream#flatMap(Function)}.<p>
+   *
+   * An example where the source stream flat maps to change stream A or B,
+   * note especially that a change of stream does not necessarily result in
+   * an emission:
+   * <pre>
+   *            Time ---&gt;
+   *       Source :--A---A--B--B--A--A---A--B---------&gt;
+   * Changes of A :-3-4-7---8--7----4-----34---5--56--&gt;
+   * Changes of B :-1---6---6----5---8----9---2---5---&gt;
+   *     Tracking :--AAAAAAABBBBBBAAAAAAAAAABBBBBBBBB-&gt;
+   *        Emits :---4-7---6----5--4-----34--2---5---&gt;
+   * </pre>
    *
    * @param mapper a {@link Function} which returns an alternative stream for each value this stream emits, cannot be null
-   * @return a {@link ChangeStream} which obtains a new stream supplied by mapper and keeps emitting its values, never null
+   * @return a {@link ChangeStream} which obtains a new stream supplied by mapper and emits its values instead, never null
    */
   <U> ChangeStream<U> flatMap(Function<? super T, ? extends ChangeStream<? extends U>> mapper);
 
   ChangeStream<T> peek(Consumer<? super T> sideEffect);
 
-  // In case the value supplied by this stream is null, feed values from supplied stream
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
    * which emits values from this stream unless the value was
@@ -118,16 +132,15 @@ public interface ChangeStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
-   * which only subscribes to its source stream when the given {@link ObservableValue}
-   * is true.<p>
+   * which only observes this stream when {@code condition} is {@code true}.<p>
    *
    * Although similar to {@link #filter(Predicate)}, the condition is not
    * based on the actual values emitted by the source stream, and as such
-   * the subscription to the source stream can be cancelled when the
+   * the subscription to the source stream can be temporarily suspended when the
    * condition evaluates to false.<p>
    *
    * @param condition a boolean {@link ObservableValue}, cannot be null
-   * @return a {@link ChangeStream} which only subscribes to its source stream when the given {@link ObservableValue} is true, never null
+   * @return a {@link ChangeStream} which only observes its source stream when {@code condition} is {@code true}, never null
    */
   ChangeStream<T> conditionOn(ObservableValue<Boolean> condition);
 
