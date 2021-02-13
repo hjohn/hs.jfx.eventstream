@@ -7,9 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
@@ -69,15 +66,11 @@ public abstract class ListHelper<T> {
         // private constructor to prevent subclassing
     }
 
-    abstract T get(int index);
     abstract ListHelper<T> add(T elem);
     abstract ListHelper<T> remove(T elem);
     abstract void forEach(Consumer<? super T> f);
-    abstract void forEachBetween(int from, int to, Consumer<? super T> f);
     abstract Iterator<T> iterator();
     abstract Iterator<T> iterator(int from, int to);
-    abstract Optional<T> reduce(BinaryOperator<T> f);
-    abstract <U> U reduce(U unit, BiFunction<U, T, U> f);
     abstract T[] toArray(IntFunction<T[]> allocator);
     abstract int size();
 
@@ -86,12 +79,6 @@ public abstract class ListHelper<T> {
 
         SingleElemHelper(T elem) {
             this.elem = elem;
-        }
-
-        @Override
-        T get(int index) {
-            assert index == 0;
-            return elem;
         }
 
         @Override
@@ -110,13 +97,6 @@ public abstract class ListHelper<T> {
 
         @Override
         void forEach(Consumer<? super T> f) {
-            f.accept(elem);
-        }
-
-        @Override
-        void forEachBetween(int from, int to, Consumer<? super T> f) {
-            assert from == 0 && to == 1;
-
             f.accept(elem);
         }
 
@@ -150,16 +130,6 @@ public abstract class ListHelper<T> {
         }
 
         @Override
-        Optional<T> reduce(BinaryOperator<T> f) {
-            return Optional.of(elem);
-        }
-
-        @Override
-        <U> U reduce(U unit, BiFunction<U, T, U> f) {
-            return f.apply(unit, elem);
-        }
-
-        @Override
         T[] toArray(IntFunction<T[]> allocator) {
             T[] res = allocator.apply(1);
             res[0] = elem;
@@ -190,11 +160,6 @@ public abstract class ListHelper<T> {
 
         private MultiElemHelper<T> copy() {
             return new MultiElemHelper<>(elems);
-        }
-
-        @Override
-        T get(int index) {
-            return elems.get(index);
         }
 
         @Override
@@ -241,18 +206,6 @@ public abstract class ListHelper<T> {
         }
 
         @Override
-        void forEachBetween(int from, int to, Consumer<? super T> f) {
-            ++iterating;
-
-            try {
-                elems.subList(from, to).forEach(f);
-            }
-            finally {
-                --iterating;
-            }
-        }
-
-        @Override
         Iterator<T> iterator() {
             return iterator(0, elems.size());
         }
@@ -286,20 +239,6 @@ public abstract class ListHelper<T> {
                     throw new NoSuchElementException();
                 }
             };
-        }
-
-        @Override
-        Optional<T> reduce(BinaryOperator<T> f) {
-            return elems.stream().reduce(f);
-        }
-
-        @Override
-        <U> U reduce(U unit, BiFunction<U, T, U> f) {
-            U u = unit;
-            for(T elem: elems) {
-                u = f.apply(u, elem);
-            }
-            return u;
         }
 
         @Override
