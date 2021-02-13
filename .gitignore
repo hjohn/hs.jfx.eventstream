@@ -1,8 +1,8 @@
-/target/
-/.classpath
-/.project
+target/
+.classpath
+.project
 /bin/
-/.settings/
-/.flattened-pom.xml
+.settings/
+.flattened-pom.xml
 /.idea
 *.iml
