@@ -291,6 +291,19 @@ public class ChangeStreamTest {
       void shouldRejectNullFunction() {
         assertThrows(NullPointerException.class, () -> Changes.of(property).flatMap(null));
       }
+
+      @Test
+      void shouldDoNothingWhenFlatMappingToNull() {
+        Changes.of(property)
+          .flatMap(v -> (ChangeStream<String>)null)
+          .subscribe(strings::add);
+
+        assertTrue(strings.isEmpty());  // expect nothing upon subscription
+
+        property.set("B");  // would trigger a NPE (which is only logged) if flatmapping code didn't handle this case specifically
+
+        assertTrue(strings.isEmpty());  // expect nothing, perfectly okay for a change stream
+      }
     }
 
     @Nested

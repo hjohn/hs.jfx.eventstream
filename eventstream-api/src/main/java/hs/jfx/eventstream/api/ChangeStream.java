@@ -71,7 +71,9 @@ public interface ChangeStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ChangeStream} which, each time this stream emits a value,
-   * obtains a new stream supplied by mapper and emits its values instead.<p>
+   * obtains a new stream supplied by mapper and emits its values instead. If
+   * the mapper function returns {@code null} an empty stream will be used
+   * instead.<p>
    *
    * Note: ChangeStreams donot emit values eagerly, so when this stream
    * emits a value, the stream being tracked changes but a value will

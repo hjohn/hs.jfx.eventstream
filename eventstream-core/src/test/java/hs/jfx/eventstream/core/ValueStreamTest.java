@@ -5,6 +5,7 @@ import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -302,6 +303,19 @@ public class ValueStreamTest {
       @Test
       void shouldRejectNullFunction() {
         assertThrows(NullPointerException.class, () -> Values.of(property).flatMap(null));
+      }
+
+      @Test
+      void shouldDoNothingWhenFlatMappingToNull() {
+        Values.of(property)
+          .flatMap(v -> (ValueStream<String>)null)
+          .subscribe(strings::add);
+
+        assertEquals(Arrays.asList((String)null), strings.drain());
+
+        property.set("B");  // would trigger a NPE (which is only logged) if flatmapping code didn't handle this case specifically
+
+        assertTrue(strings.isEmpty());  // expect nothing, even though this is a value stream -- donot return null from a flatmap if you want proper ValueStream behavior
       }
     }
 

@@ -37,8 +37,23 @@ public abstract class FlatMapStream {
     @Override
     public Subscription observeInputs(ObservableStream<T> source, Emitter<U> emitter) {
       Subscription s = source.subscribe(t -> {
+        ObservableStream<? extends U> newStream = map(t);
+
+        /*
+         * When the flatmapping results in null, an empty stream is tracked (or rather
+         * no subscription is made at all). This means effectively that the resulting
+         * stream will emit nothing until the source triggers a flatmapping to a
+         * different stream.
+         *
+         * For ValueStreams this can be a bit unexpected, as no value will be emitted.
+         * However, the alternative (throwing an exception) does not work well because
+         * JavaFX fireValueChangeEvent code will necessarily catch and log this as
+         * there is no way to properly let this bubble up to where the stream was
+         * created.
+         */
+
         mappedSubscription.unsubscribe();
-        mappedSubscription = map(t).subscribe(emitter::emit);
+        mappedSubscription = newStream == null ? Subscription.EMPTY : newStream.subscribe(emitter::emit);
       });
 
       return () -> {
