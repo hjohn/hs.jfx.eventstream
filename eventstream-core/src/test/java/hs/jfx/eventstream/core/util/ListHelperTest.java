@@ -1,7 +1,5 @@
 package hs.jfx.eventstream.core.util;
 
-import hs.jfx.eventstream.core.util.ListHelper;
-
 import java.util.Iterator;
 
 import javafx.beans.property.IntegerProperty;

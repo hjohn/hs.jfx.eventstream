@@ -1,7 +1,6 @@
 package hs.jfx.eventstream.core;
 
 import hs.jfx.eventstream.api.Subscription;
-import hs.jfx.eventstream.core.Invalidations;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.util.List;

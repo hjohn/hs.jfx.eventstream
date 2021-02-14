@@ -1,7 +1,6 @@
 package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.core.ChangeSource;
-import hs.jfx.eventstream.core.impl.DefaultStream;
 import hs.jfx.eventstream.core.util.Sink;
 
 import org.junit.jupiter.api.Test;

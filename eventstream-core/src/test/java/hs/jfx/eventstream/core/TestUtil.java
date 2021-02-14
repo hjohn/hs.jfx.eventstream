@@ -2,8 +2,6 @@ package hs.jfx.eventstream.core;
 
 import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.ValueStream;
-import hs.jfx.eventstream.core.Changes;
-import hs.jfx.eventstream.core.Values;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
