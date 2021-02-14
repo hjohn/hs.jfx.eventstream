@@ -89,14 +89,14 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
 
   @Override
   public <U> ValueStream<U> flatMap(Function<? super T, ? extends ValueStream<? extends U>> mapper) {
-    return new FlatMapStream.Value<>(this, mapper, () -> RootValueStream.constant((U)null));  // TODO check if this constant is correct
+    return new FlatMapStream.Value<>(this, mapper, () -> RootValueStream.constant(null));
   }
 
   @Override
   public <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper) {
     Objects.requireNonNull(mapper);
 
-    return new FlatMapStream.Value<>(this, v -> RootValueStream.of(mapper.apply(v)), () -> RootValueStream.constant((U)null));// TODO check if this constant is correct
+    return new FlatMapStream.Value<>(this, v -> RootValueStream.of(mapper.apply(v)), () -> RootValueStream.constant(null));
   }
 
   @Override
