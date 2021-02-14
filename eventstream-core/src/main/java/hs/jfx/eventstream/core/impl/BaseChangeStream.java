@@ -78,6 +78,6 @@ public class BaseChangeStream<S, T> extends BaseObservableStream<T> implements C
   @Override
   public ChangeStream<T> conditionOn(ObservableValue<Boolean> condition) {
     return RootValueStream.of(condition)
-      .flatMapToChange(c -> c ? this : RootChangeStream.empty());
+      .flatMapToChange(c -> c ? this : RootChangeStream.empty());  // no need to deal with c being null
   }
 }

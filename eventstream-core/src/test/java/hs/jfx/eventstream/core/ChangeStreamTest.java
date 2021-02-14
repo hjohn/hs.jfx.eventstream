@@ -84,6 +84,48 @@ public class ChangeStreamTest {
 
         assertEquals(List.of("World", "World", "World"), strings.drain());  // all subscribers get current value
       }
+
+      @Test
+      public void shouldNotImmediatelyEmitValuesWhenConditionBecomesTrue() {
+        property.set("Bye");
+
+        BooleanProperty visible = new SimpleBooleanProperty(false);
+        ChangeStream<String> stream = Changes.of(property)
+          .conditionOn(visible)
+          .map(String::toUpperCase);
+
+        stream.subscribe(strings::add);
+
+        assertEquals(List.of(), strings.drain());
+
+        visible.set(true);
+
+        assertEquals(List.of(), strings.drain());
+      }
+
+      @Test
+      void shouldTreatNullAsFalse() {
+        ObjectProperty<Boolean> visible = new SimpleObjectProperty<>();
+        Changes.of(property)
+          .conditionOn(visible)  // internally, this uses flatMap, which is null safe
+          .orElse("Boom")
+          .subscribe(strings::add);
+
+        visible.set(false);
+        property.set("Hello");
+
+        assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is false
+
+        visible.set(null);
+        property.set("World");
+
+        assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is null
+
+        visible.set(true);
+        property.set("Goodbye");
+
+        assertEquals(List.of("Goodbye"), strings.drain());
+      }
     }
 
     @Nested

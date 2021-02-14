@@ -121,6 +121,17 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
 
   @Override
   public ValueStream<T> conditionOn(ObservableValue<Boolean> condition) {
-    return RootValueStream.of(condition).flatMap(c -> c ? this : RootValueStream.empty());  // TODO constant???
+
+    /*
+     * Conditional streams return an empty value stream when the condition does not hold.
+     * This is intended behavior. A custom FlatMapStream is created here because the normal
+     * flatmapping behavior would return a constant null stream instead of an empty one.
+     */
+
+    return new FlatMapStream.Value<>(
+      RootValueStream.of(condition),
+      c -> c ? this : RootValueStream.empty(),
+      () -> RootValueStream.empty()
+    );
   }
 }

@@ -141,6 +141,30 @@ public class ValueStreamTest {
 
         assertEquals(List.of("BYE"), strings.drain());
       }
+
+      @Test
+      void shouldTreatNullAsFalse() {
+        ObjectProperty<Boolean> visible = new SimpleObjectProperty<>();
+        Values.of(property)
+          .conditionOn(visible)  // internally, this uses flatMap, which is null safe
+          .subscribe(strings::add);
+
+        assertEquals(List.of(), strings.drain());  // nothing expected upon subscription as per conditionOn contract
+
+        visible.set(false);
+        property.set("Hello");
+
+        assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is false
+
+        visible.set(null);
+        property.set("World");
+
+        assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is null
+
+        visible.set(true);  // this triggers an immediate emit
+
+        assertEquals(List.of("World"), strings.drain());
+      }
     }
 
     @Nested

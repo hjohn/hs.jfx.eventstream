@@ -133,7 +133,8 @@ public interface ChangeStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
-   * which only observes this stream when {@code condition} is {@code true}.<p>
+   * which only observes this stream when {@code condition} is {@code true}.
+   * If the condition is {@code null} this is considered to be {@code false}.<p>
    *
    * Although similar to {@link #filter(Predicate)}, the condition is not
    * based on the actual values emitted by the source stream, and as such

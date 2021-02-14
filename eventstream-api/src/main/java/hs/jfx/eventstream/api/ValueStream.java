@@ -103,12 +103,16 @@ public interface ValueStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ValueStream}, using this stream as its source,
-   * which only observes this stream when {@code condition} is {@code true}.<p>
+   * which only observes this stream when {@code condition} is {@code true}.
+   * If the condition is {@code null} this is considered to be {@code false}.<p>
    *
    * Although similar to {@link #filter(Predicate)}, the condition is not
    * based on the actual values emitted by the source stream, and as such
    * the subscription to the source stream can be temporarily suspended when the
    * condition evaluates to false.<p>
+   *
+   * Note that it is intended behavior that this stream does not supply anything
+   * to new subscribers when the condition is currently {@code false}.
    *
    * @param condition a boolean {@link ObservableValue}, cannot be null
    * @return a {@link ValueStream} which only observes its source stream when {@code condition} is {@code true}, never null
