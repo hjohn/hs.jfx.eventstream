@@ -17,10 +17,9 @@ import javafx.beans.value.ObservableValue;
  * Subscribers will receive the current value upon subscription immediately
  * (if attached to a source) and then any new values when they occur.<p>
  *
- * The intermediate operations offered by this stream are null safe.
- * Intermediate operations will not be called when the stream emits
- * <code>null</code> unless otherwise specified or specifically intended
- * to handle <code>null</code>s.<p>
+ * Operations offered by this stream which accept a {@link Function}
+ * or {@link Predicate} are all null safe and will not be called when the
+ * stream emits {@code null}, unless otherwise specified.<p>
  *
  * This is a lazy stream, which means that it only observes its source
  * when it has observers of its own.  When there are no subscribers,
@@ -60,6 +59,9 @@ public interface ValueStream<T> extends ObservableStream<T> {
    *        Emits :--34-7---6----57-4-----349-2---5---&gt;
    * </pre>
    *
+   * This function is null safe and will not be called when the stream
+   * emits {@code null}.
+   *
    * @param mapper a {@link Function} which returns an alternative stream for each value this stream emits, cannot be null
    * @return a {@link ValueStream} which obtains a new stream supplied by mapper and emits its values instead, never null
    */
@@ -87,6 +89,9 @@ public interface ValueStream<T> extends ObservableStream<T> {
    *     Tracking :--AAAAAAABBBBBBAAAAAAAAAABBBBBBBBB-&gt;
    *        Emits :---4-7---6----5--4-----34--2---5---&gt;
    * </pre>
+   *
+   * This function is null safe and will not be called when the stream
+   * emits {@code null}.
    *
    * @param mapper a {@link Function} which returns an alternative stream for each value this stream emits, cannot be null
    * @return a {@link ChangeStream} which obtains a new stream supplied by mapper and emits its values instead, never null

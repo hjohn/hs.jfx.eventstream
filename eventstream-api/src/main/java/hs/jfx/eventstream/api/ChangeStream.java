@@ -16,10 +16,9 @@ import javafx.beans.value.ObservableValue;
  * occur it is therefore possible that a subscription will never receive
  * a change.<p>
  *
- * The intermediate operations offered by this stream are null safe.
- * Intermediate operations will not be called when the stream emits
- * <code>null</code> unless otherwise specified or specifically intended
- * to handle <code>null</code>s.<p>
+ * Operations offered by this stream which accept a {@link Function}
+ * or {@link Predicate} are all null safe and will not be called when the
+ * stream emits {@code null}, unless otherwise specified.<p>
  *
  * This is a lazy stream, which means that it only observes its source
  * when it has observers of its own.  When there are no subscribers,
@@ -31,7 +30,10 @@ public interface ChangeStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
-   * which only emits values matching the given predicate.
+   * which only emits values matching the given predicate.<p>
+   *
+   * This function is null safe and will not be called when the stream
+   * emits {@code null}.
    *
    * @param predicate a {@link Predicate} which values must match to be emitted, cannot be null
    * @return a {@link ChangeStream} which only emits values matching the given predicate, never null
@@ -61,7 +63,10 @@ public interface ChangeStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
-   * which emits values converted by the given mapper function.
+   * which emits values converted by the given mapper function.<p>
+   *
+   * This function is null safe and will not be called when the stream
+   * emits {@code null}.
    *
    * @param <U> the type of values the new stream emits
    * @param mapper a {@link Function} which converts a source value to a new value to emit, cannot be null
@@ -91,6 +96,9 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    *     Tracking :--AAAAAAABBBBBBAAAAAAAAAABBBBBBBBB-&gt;
    *        Emits :---4-7---6----5--4-----34--2---5---&gt;
    * </pre>
+   *
+   * This function is null safe and will not be called when the stream
+   * emits {@code null}.
    *
    * @param mapper a {@link Function} which returns an alternative stream for each value this stream emits, cannot be null
    * @return a {@link ChangeStream} which obtains a new stream supplied by mapper and emits its values instead, never null
