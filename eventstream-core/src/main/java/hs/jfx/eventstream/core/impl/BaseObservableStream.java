@@ -14,11 +14,14 @@ public abstract class BaseObservableStream<T> implements ObservableStream<T> {
 
   @Override
   public final void addObserver(Consumer<? super T> observer) {
-    if(ListHelper.size(observers) == 0) { // TODO why not just check if inputSubscriptoin is null?
+    if(observer == null) {
+      throw new NullPointerException("observer cannot be null");
+    }
+
+    if(inputSubscription == null) {
       inputSubscription = observeInputs();
     }
 
-    // TODO requireNonNull is too late here, if it is null, then observeInputs has been called already!
     observers = ListHelper.add(observers, Objects.requireNonNull(observer));
 
     sendInitialEvent(observer);
@@ -28,7 +31,7 @@ public abstract class BaseObservableStream<T> implements ObservableStream<T> {
   public final void removeObserver(Consumer<? super T> observer) {
     observers = ListHelper.remove(observers, Objects.requireNonNull(observer));
 
-    if(ListHelper.isEmpty(observers) && inputSubscription != null) {
+    if(ListHelper.isEmpty(observers) && inputSubscription != null) {  // null check required here as it is possible to unregister another observer when there none
       inputSubscription.unsubscribe();
       inputSubscription = null;
     }
