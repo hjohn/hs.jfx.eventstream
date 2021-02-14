@@ -11,7 +11,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 public class RootValueStream<T> extends BaseValueStream<T, T> {
-  private static final RootValueStream<?> EMPTY = new RootValueStream<>(e -> Subscription.EMPTY, () -> nullEvent());
+  static final RootValueStream<?> EMPTY = new RootValueStream<>(e -> Subscription.EMPTY, () -> nullEvent());
 
   private final Supplier<T> defaultValueSupplier;
 
@@ -47,12 +47,6 @@ public class RootValueStream<T> extends BaseValueStream<T, T> {
   @Override
   public T getCurrentValue() {
     return defaultValueSupplier.get();
-  }
-
-  // TODO clarify why this can exist
-  @SuppressWarnings("unchecked")
-  public static <T> ValueStream<T> empty() {
-    return (ValueStream<T>)EMPTY;
   }
 
   public static <T> ValueStream<T> constant(T value) {

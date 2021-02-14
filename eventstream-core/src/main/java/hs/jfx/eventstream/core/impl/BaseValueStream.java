@@ -130,8 +130,21 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
 
     return new FlatMapStream.Value<>(
       RootValueStream.of(condition),
-      c -> c ? this : RootValueStream.empty(),
-      () -> RootValueStream.empty()
+      c -> c ? this : empty(),
+      () -> empty()
     );
+  }
+
+  /**
+   * Returns a {@link ValueStream} which never emits anything, which goes against
+   * the general contract of a value stream. This is only used for {@link #conditionOn(ObservableValue)}
+   * which documents this behavior.
+   *
+   * @param <T> the type of values the stream emits
+   * @return a {@link ValueStream} which never emits anything, never null
+   */
+  @SuppressWarnings("unchecked")
+  private static <T> ValueStream<T> empty() {
+    return (ValueStream<T>)RootValueStream.EMPTY;
   }
 }
