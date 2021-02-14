@@ -6,6 +6,7 @@ import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -447,6 +448,20 @@ public class ChangeStreamTest {
         finally {
           Thread.setDefaultUncaughtExceptionHandler(defaultUncaughtExceptionHandler);
         }
+      }
+
+      @Test
+      void shouldAllowNullValues() {
+        Sink<String> peekedValues = new Sink<>();
+
+        property.set("A");
+
+        Changes.of(property).peek(peekedValues::add).subscribe(strings::add);
+
+        property.set(null);
+
+        assertEquals(Arrays.asList((String)null), peekedValues.drain());
+        assertEquals(Arrays.asList((String)null), strings.drain());
       }
 
       @Test

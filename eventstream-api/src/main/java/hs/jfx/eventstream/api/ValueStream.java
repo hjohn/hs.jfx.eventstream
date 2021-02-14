@@ -98,6 +98,17 @@ public interface ValueStream<T> extends ObservableStream<T> {
    */
   <U> ChangeStream<U> flatMapToChange(Function<? super T, ? extends ChangeStream<? extends U>> mapper);
 
+  /**
+   * Returns a {@link ValueStream} which emits the same values as this stream and,
+   * each time this stream emits a value, calls the given {@code sideEffect}
+   * consumer with the value.<p>
+   *
+   * Note that this function is not null safe and the value supplied can be {@code null}
+   * if the stream emits it.
+   *
+   * @return a {@link ValueStream} which emits the same values as this stream and calls the given {@code sideEffect}
+   *         consumer with each value, never null
+   */
   ValueStream<T> peek(Consumer<? super T> sideEffect);
 
   ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier);

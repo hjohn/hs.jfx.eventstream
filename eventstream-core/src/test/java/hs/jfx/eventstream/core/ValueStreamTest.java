@@ -459,6 +459,23 @@ public class ValueStreamTest {
       }
 
       @Test
+      void shouldAllowNullValues() {
+        Sink<String> peekedValues = new Sink<>();
+
+        property.set("A");
+
+        Values.of(property).peek(peekedValues::add).subscribe(strings::add);
+
+        assertEquals(List.of("A"), peekedValues.drain());
+        assertEquals(List.of("A"), strings.drain());
+
+        property.set(null);
+
+        assertEquals(Arrays.asList((String)null), peekedValues.drain());
+        assertEquals(Arrays.asList((String)null), strings.drain());
+      }
+
+      @Test
       void shouldRejectNullConsumer() {
         assertThrows(NullPointerException.class, () -> Values.of(property).peek(null));
       }
