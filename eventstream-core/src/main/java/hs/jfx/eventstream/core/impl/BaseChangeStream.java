@@ -24,12 +24,12 @@ public class BaseChangeStream<S, T> extends BaseObservableStream<T> implements C
   }
 
   @Override
-  public ChangeStream<T> filter(Predicate<T> predicate) {
+  public ChangeStream<T> filter(Predicate<? super T> predicate) {
     return new FilterStream<>(this, predicate);
   }
 
   @Override
-  public ValueStream<T> withDefaultGet(Supplier<T> defaultValueSupplier) {
+  public ValueStream<T> withDefaultGet(Supplier<? extends T> defaultValueSupplier) {
     return new DefaultStream<>(this, defaultValueSupplier);
   }
 
@@ -56,7 +56,7 @@ public class BaseChangeStream<S, T> extends BaseObservableStream<T> implements C
   }
 
   @Override
-  public ChangeStream<T> orElseGet(Supplier<T> valueSupplier) {
+  public ChangeStream<T> orElseGet(Supplier<? extends T> valueSupplier) {
     return new MapStream.Change<>(this, Function.identity(), valueSupplier);
   }
 

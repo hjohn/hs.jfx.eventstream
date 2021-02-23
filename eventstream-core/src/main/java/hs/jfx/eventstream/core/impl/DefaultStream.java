@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 
 public class DefaultStream<T> extends BaseValueStream<T, T> {
 
-  public DefaultStream(ObservableStream<T> source, Supplier<T> defaultValueSupplier) {
+  public DefaultStream(ObservableStream<T> source, Supplier<? extends T> defaultValueSupplier) {
     super(new Subscriber<>(Objects.requireNonNull(defaultValueSupplier)) {
       @Override
       protected Subscription observeInputs(Emitter<T> emitter) {

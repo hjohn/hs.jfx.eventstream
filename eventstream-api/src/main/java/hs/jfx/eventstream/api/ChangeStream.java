@@ -38,7 +38,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param predicate a {@link Predicate} which values must match to be emitted, cannot be null
    * @return a {@link ChangeStream} which only emits values matching the given predicate, never null
    */
-  ChangeStream<T> filter(Predicate<T> predicate);
+  ChangeStream<T> filter(Predicate<? super T> predicate);
 
   /**
    * Returns a {@link ValueStream}, using this stream as its source,
@@ -59,7 +59,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param defaultValueSupplier a {@link Supplier} which supplies the value to emit as default value for new subscribers
    * @return a {@link ValueStream} which uses the given defaultValueSupplier to provide its default value, never null
    */
-  ValueStream<T> withDefaultGet(Supplier<T> defaultValueSupplier);
+  ValueStream<T> withDefaultGet(Supplier<? extends T> defaultValueSupplier);
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
@@ -150,7 +150,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @param valueSupplier a {@link Supplier} which supplies the value to emit instead of <code>null</code>
    * @return a {@link ChangeStream} with <code>null</code>s replaced with the value supplied by the given {@link Supplier}, never null
    */
-  ChangeStream<T> orElseGet(Supplier<T> valueSupplier);
+  ChangeStream<T> orElseGet(Supplier<? extends T> valueSupplier);
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,

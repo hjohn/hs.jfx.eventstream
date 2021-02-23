@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  */
 public abstract class Subscriber<S, T> {
   private final ObservableStream<S> source;
-  private final Supplier<T> defaultValueSupplier;
+  private final Supplier<? extends T> defaultValueSupplier;
 
   /**
    * Creates an instance suitable for streams which may have to supply
@@ -26,7 +26,7 @@ public abstract class Subscriber<S, T> {
    *
    * @param defaultValueSupplier a {@link Supplier} which can supply initial values for new subscriptions
    */
-  protected Subscriber(Supplier<T> defaultValueSupplier) {
+  protected Subscriber(Supplier<? extends T> defaultValueSupplier) {
     this.source = null;
     this.defaultValueSupplier = defaultValueSupplier;
   }
