@@ -8,9 +8,9 @@ import java.util.function.Predicate;
 
 public class FilterStream<T> extends BaseChangeStream<T, T> {
   public FilterStream(ObservableStream<T> source, Predicate<? super T> predicate) {
-    super(Objects.requireNonNull(source), new ChangeAction<>() {
+    super(new Subscriber<>(Objects.requireNonNull(source)) {
       @Override
-      public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
+      public Subscription observeInputs(Emitter<T> emitter) {
         return source.subscribe(v -> {
           if(v == null || predicate.test(v)) {
             emitter.emit(v);

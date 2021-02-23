@@ -2,6 +2,7 @@ package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.ObservableStream;
+import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
 
@@ -13,30 +14,32 @@ public abstract class FlatMapStream {
 
   public static class Change<T, U> extends BaseChangeStream<T, U> {
     public Change(ObservableStream<T> source, Function<? super T, ? extends ChangeStream<? extends U>> mapper, Supplier<? extends ChangeStream<? extends U>> nullReplacement) {
-      super(source, new FlatMapAction<>(mapper, nullReplacement));
+      super(new FlatMapSubscriber<>(source, mapper, nullReplacement));
     }
   }
 
   public static class Value<T, U> extends BaseValueStream<T, U> {
     public Value(ObservableStream<T> source, Function<? super T, ? extends ValueStream<? extends U>> mapper, Supplier<? extends ValueStream<? extends U>> nullReplacement) {
-      super(source, new FlatMapAction<>(mapper, nullReplacement));
+      super(new FlatMapSubscriber<>(source, mapper, nullReplacement));
     }
   }
 
-  public static class FlatMapAction<T, U> implements Action<T, U> {
+  public static class FlatMapSubscriber<T, U> extends Subscriber<T, U> {
     private final Function<? super T, ? extends ObservableStream<? extends U>> mapper;
     private final Supplier<? extends ObservableStream<? extends U>> nullReplacement;
 
     private Subscription mappedSubscription = Subscription.EMPTY;
 
-    public FlatMapAction(Function<? super T, ? extends ObservableStream<? extends U>> mapper, Supplier<? extends ObservableStream<? extends U>> nullReplacement) {
+    public FlatMapSubscriber(ObservableStream<T> source, Function<? super T, ? extends ObservableStream<? extends U>> mapper, Supplier<? extends ObservableStream<? extends U>> nullReplacement) {
+      super(source);
+
       this.mapper = Objects.requireNonNull(mapper);
       this.nullReplacement = Objects.requireNonNull(nullReplacement);
     }
 
     @Override
-    public Subscription observeInputs(ObservableStream<T> source, Emitter<U> emitter) {
-      Subscription s = source.subscribe(t -> {
+    public Subscription observeInputs(Emitter<U> emitter) {
+      Subscription s = getSource().subscribe(t -> {
         ObservableStream<? extends U> newStream = map(t);
 
         /*
@@ -64,8 +67,8 @@ public abstract class FlatMapStream {
     }
 
     @Override
-    public U operate(T value) {
-      @SuppressWarnings("unchecked") // cast is save as operate is only called for ValueStreams
+    public OptionalValue<U> operate(T value) {
+      @SuppressWarnings("unchecked") // cast is safe as operate is only called for ValueStreams
       BaseValueStream<T, U> mappedStream = (BaseValueStream<T, U>)map(value);
 
       return mappedStream.getCurrentValue();

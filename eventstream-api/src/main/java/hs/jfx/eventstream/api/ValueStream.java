@@ -143,4 +143,36 @@ public interface ValueStream<T> extends ObservableStream<T> {
 
   // Convienence function...
   <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper);
+
+  /**
+   * Returns an {@link OptionalValue} which contained value this stream will supply
+   * to new subscribers. If the {@link OptionalValue} is empty, no value will be
+   * supplied to new subscribers.<p>
+   *
+   * Depending on how the stream is constructed the contained value could be
+   * considered the "current" value of the stream (if based on a property). It
+   * specifically is not the <b>last</b> value emitted by this stream; if not all
+   * ancestors are {@link ValueStream}s then the calculation of the value will
+   * start at the last ancestor in the ancestor chain which is still a
+   * {@link ValueStream}.<p>
+   *
+   * Example 1:
+   * <pre>Values.of(property).getCurrentValue();</pre>
+   * Returns the value of {@code property} directly.<p>
+   *
+   * Example 2:
+   * <pre>
+   * Values.of(property)
+   *     .filter(f)         // returns a ChangeStream
+   *     .withDefault("X")  // returns a ValueStream
+   *     .map(v -> v + "Y")
+   *     .getCurrentValue();
+   * </pre>
+   * Returns "XY" because {@code filter} does not result in a {@code ValueStream}. The
+   * last ancestor which is a {@code ValueStream} supplies "X", and after mapping this becomes "XY".<p>
+   *
+   * @return an {@link OptionalValue} which contained value this stream will supply
+   *     to new subscribers, never null
+   */
+  OptionalValue<T> getCurrentValue();
 }

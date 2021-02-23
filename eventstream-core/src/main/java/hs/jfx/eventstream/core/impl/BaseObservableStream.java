@@ -1,6 +1,7 @@
 package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ObservableStream;
+import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.core.util.ListHelper;
 
@@ -8,9 +9,22 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+/**
+ * Base class for observable streams.
+ *
+ * @param <T> type of values emitted by this stream
+ */
 public abstract class BaseObservableStream<T> implements ObservableStream<T> {
+  private final Subscriber<?, T> subscriber;
+  private final boolean sendInitialEvent;
+
   private ListHelper<Consumer<? super T>> observers;
   private Subscription inputSubscription;
+
+  public BaseObservableStream(Subscriber<?, T> subscriber, boolean sendInitialEvent) {
+    this.subscriber = subscriber;
+    this.sendInitialEvent = sendInitialEvent;
+  }
 
   @Override
   public final void addObserver(Consumer<? super T> observer) {
@@ -19,12 +33,14 @@ public abstract class BaseObservableStream<T> implements ObservableStream<T> {
     }
 
     if(inputSubscription == null) {
-      inputSubscription = observeInputs();
+      inputSubscription = subscriber.observeInputs(this::emit);
     }
 
-    observers = ListHelper.add(observers, Objects.requireNonNull(observer));
+    if(sendInitialEvent) {
+      subscriber.sendInitialEvent(observer);
+    }
 
-    sendInitialEvent(observer);
+    observers = ListHelper.add(observers, observer);
   }
 
   @Override
@@ -38,7 +54,7 @@ public abstract class BaseObservableStream<T> implements ObservableStream<T> {
   }
 
   /**
-   * Emits the given value as an event for this event stream.
+   * Emits the given value to subscribers of this stream.
    *
    * @param value a value to emit
    */
@@ -52,13 +68,7 @@ public abstract class BaseObservableStream<T> implements ObservableStream<T> {
     }
   }
 
-  /**
-   * Starts observing this observable's input(s), if any. This method is called when the number of observers goes from 0
-   * to 1.
-   *
-   * @return subscription used to stop observing inputs. The subscription is unsubscribed (i.e. input observation stops)
-   *         when the number of observers goes down to 0.
-   */
-  protected abstract Subscription observeInputs();
-  protected abstract void sendInitialEvent(Consumer<? super T> observer);
+  protected final OptionalValue<T> determineCurrentValue() {
+    return subscriber.getCurrentValue();
+  }
 }

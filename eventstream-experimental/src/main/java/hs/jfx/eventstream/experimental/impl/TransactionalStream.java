@@ -1,41 +1,46 @@
 package hs.jfx.eventstream.experimental.impl;
 
 import hs.jfx.eventstream.api.ObservableStream;
+import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscription;
-import hs.jfx.eventstream.core.impl.Action;
 import hs.jfx.eventstream.core.impl.BaseChangeStream;
 import hs.jfx.eventstream.core.impl.BaseInvalidationStream;
 import hs.jfx.eventstream.core.impl.BaseValueStream;
 import hs.jfx.eventstream.core.impl.Emitter;
+import hs.jfx.eventstream.core.impl.Subscriber;
 import hs.jfx.eventstream.experimental.Transactions;
 
 public abstract class TransactionalStream {
 
   public static class Invalidation extends BaseInvalidationStream {
     public Invalidation(ObservableStream<Void> source) {
-      super(source, new TransactionalAction<>());
+      super(new TransactionalAction<>(source));
     }
   }
 
   public static class Change<T> extends BaseChangeStream<T, T> {
     public Change(ObservableStream<T> source) {
-      super(source, new TransactionalAction<>());
+      super(new TransactionalAction<>(source));
     }
   }
 
   public static class Value<T> extends BaseValueStream<T, T> {
     public Value(ObservableStream<T> source) {
-      super(source, new TransactionalAction<>());
+      super(new TransactionalAction<>(source));
     }
   }
 
-  private static class TransactionalAction<T> implements Action<T, T> {
+  private static class TransactionalAction<T> extends Subscriber<T, T> {
     private T storedEvent;
     private Subscription transactionFinishedSubscription;
 
+    public TransactionalAction(ObservableStream<T> source) {
+      super(source);
+    }
+
     @Override
-    public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
-      Subscription subscription = source.subscribe(t -> {
+    public Subscription observeInputs(Emitter<T> emitter) {
+      Subscription subscription = getSource().subscribe(t -> {
         if(!Transactions.inProgress()) {
           emitter.emit(t);
         }
@@ -67,8 +72,8 @@ public abstract class TransactionalStream {
     }
 
     @Override
-    public T operate(T value) {
-      return value;
+    public OptionalValue<T> operate(T value) {
+      return OptionalValue.of(value);
     }
   }
 }

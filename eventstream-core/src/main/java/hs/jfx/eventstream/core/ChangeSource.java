@@ -1,10 +1,9 @@
 package hs.jfx.eventstream.core;
 
 import hs.jfx.eventstream.api.ChangeStream;
-import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.Subscription;
+import hs.jfx.eventstream.core.impl.Subscriber;
 import hs.jfx.eventstream.core.impl.BaseChangeStream;
-import hs.jfx.eventstream.core.impl.ChangeAction;
 import hs.jfx.eventstream.core.impl.Emitter;
 
 /**
@@ -19,9 +18,9 @@ public class ChangeSource<T> extends BaseChangeStream<T, T> {
    * Constructs a new instance.
    */
   public ChangeSource() {
-    super(null, new ChangeAction<>() {
+    super(new Subscriber<>() {
       @Override
-      public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
+      public Subscription observeInputs(Emitter<T> emitter) {
         return Subscription.EMPTY;
       }
     });
@@ -29,7 +28,7 @@ public class ChangeSource<T> extends BaseChangeStream<T, T> {
 
   /**
    * Emits the given value to subscribers of this stream.
-   * 
+   *
    * @param value a value to emit
    */
   public void push(T value) {

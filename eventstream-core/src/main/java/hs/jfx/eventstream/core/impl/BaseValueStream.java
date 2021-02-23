@@ -1,8 +1,7 @@
 package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ChangeStream;
-import hs.jfx.eventstream.api.ObservableStream;
-import hs.jfx.eventstream.api.Subscription;
+import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.util.StreamUtil;
 
@@ -16,60 +15,14 @@ import javafx.beans.binding.Binding;
 import javafx.beans.value.ObservableValue;
 
 /**
- * Base class for event streams.
+ * Base class for value streams.
  *
- * @param <T> type of events emitted by this event stream
+ * @param <T> type of values emitted by this stream
  */
 public class BaseValueStream<S, T> extends BaseObservableStream<T> implements ValueStream<T> {
-  private static final Object NULL_EVENT = new Object();
 
-  @SuppressWarnings("unchecked")
-  public static <T> T nullEvent() {
-    return (T)NULL_EVENT;
-  }
-
-  private final ObservableStream<S> source;
-  private final Action<S, T> action;
-
-  public BaseValueStream(ObservableStream<S> source, Action<S, T> action) {
-    this.source = source;
-    this.action = action;
-  }
-
-  @Override
-  protected final Subscription observeInputs() {
-    return action.observeInputs(source, this::emit);
-  }
-
-  @Override
-  protected void sendInitialEvent(Consumer<? super T> observer) {
-    T currentValue = getCurrentValue();
-
-    if(currentValue != NULL_EVENT) {
-      observer.accept(currentValue);
-    }
-  }
-
-  /**
-   * Returns the value this stream supplies to new subscribers. This method
-   * must be overriden if the source is NOT an implementation of {@link BaseValueStream}.<p>
-   *
-   * Note that this method can return a special value {@link #NULL_EVENT} when
-   * this stream is not currently attached to its source.
-   *
-   * @return the value this stream supplies to new subscribers or the special {@link #NULL_EVENT}
-   */
-  protected T getCurrentValue() {
-
-    /*
-     * The source is guaranteed to be a non-null ValueStream because streams
-     * allowing a ChangeStream source for a ValueStream must override this method.
-     */
-
-    @SuppressWarnings("unchecked")
-    S currentValue = ((BaseValueStream<?, S>)source).getCurrentValue();
-
-    return currentValue == NULL_EVENT ? nullEvent() : action.operate(currentValue);
+  public BaseValueStream(Subscriber<S, T> subscriber) {
+    super(subscriber, true);
   }
 
   @Override
@@ -146,5 +99,10 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
   @SuppressWarnings("unchecked")
   private static <T> ValueStream<T> empty() {
     return (ValueStream<T>)RootValueStream.EMPTY;
+  }
+
+  @Override
+  public OptionalValue<T> getCurrentValue() {
+    return determineCurrentValue();
   }
 }

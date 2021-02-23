@@ -1,11 +1,10 @@
 package hs.jfx.eventstream.core;
 
 import hs.jfx.eventstream.api.InvalidationStream;
-import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.core.impl.BaseInvalidationStream;
 import hs.jfx.eventstream.core.impl.Emitter;
-import hs.jfx.eventstream.core.impl.InvalidationAction;
+import hs.jfx.eventstream.core.impl.Subscriber;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -22,9 +21,9 @@ public class Invalidations {
    * @return a stream that emits an impulse for each invalidation of the given {@code Observable}s for every subscriber, never null
    */
   public static InvalidationStream of(Observable... observables) {
-    return new BaseInvalidationStream(null, new InvalidationAction() {
+    return new BaseInvalidationStream(new Subscriber<Void, Void>() {
       @Override
-      public Subscription observeInputs(ObservableStream<Void> source, Emitter<Void> emitter) {
+      public Subscription observeInputs(Emitter<Void> emitter) {
         InvalidationListener listener = obs -> emitter.emit(null);
 
         for(Observable observable : observables) {

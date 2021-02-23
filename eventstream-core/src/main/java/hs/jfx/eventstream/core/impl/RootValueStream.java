@@ -1,6 +1,5 @@
 package hs.jfx.eventstream.core.impl;
 
-import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
 
@@ -11,9 +10,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 public class RootValueStream<T> extends BaseValueStream<T, T> {
-  static final RootValueStream<?> EMPTY = new RootValueStream<>(e -> Subscription.EMPTY, () -> nullEvent());
-
-  private final Supplier<T> defaultValueSupplier;
+  static final RootValueStream<?> EMPTY = new RootValueStream<>(e -> Subscription.EMPTY, null);
 
   public static <T> RootValueStream<T> of(ObservableValue<T> observable) {
     return new RootValueStream<>(e -> subscribe(e, observable), observable::getValue);
@@ -28,25 +25,12 @@ public class RootValueStream<T> extends BaseValueStream<T, T> {
   }
 
   private RootValueStream(Function<Emitter<T>, Subscription> subscriber, Supplier<T> defaultValueSupplier) {
-    super(null, new Action<>() {
-
+    super(new Subscriber<>(defaultValueSupplier) {
       @Override
-      public Subscription observeInputs(ObservableStream<T> source, Emitter<T> emitter) {
+      public Subscription observeInputs(Emitter<T> emitter) {
         return subscriber.apply(emitter);
       }
-
-      @Override
-      public T operate(T value) {
-        throw new UnsupportedOperationException();
-      }
     });
-
-    this.defaultValueSupplier = defaultValueSupplier;
-  }
-
-  @Override
-  public T getCurrentValue() {
-    return defaultValueSupplier.get();
   }
 
   public static <T> ValueStream<T> constant(T value) {

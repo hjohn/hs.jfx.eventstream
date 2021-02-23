@@ -14,7 +14,7 @@ public class ValueStreamBinding<T> extends ObservableValueBase<T> implements Bin
   private T value;
 
   public <S> ValueStreamBinding(BaseValueStream<S, T> input) {
-    value = Objects.requireNonNull(input).getCurrentValue();
+    value = Objects.requireNonNull(input).getCurrentValue().orElse(null);
     subscription = input.subscribe(v -> {
       value = v;
       fireValueChangedEvent();

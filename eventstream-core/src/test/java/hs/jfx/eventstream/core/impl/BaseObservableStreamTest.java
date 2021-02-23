@@ -5,6 +5,7 @@ import hs.jfx.eventstream.core.util.Sink;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,23 +14,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BaseObservableStreamTest {
-  private final BaseObservableStream<String> stream = new BaseObservableStream<>() {
+  private int sendInitialEventCalls;
+  private int observeInputsCalls;
+  private int unsubscribeCalls;
+
+  private Supplier<String> nullSupplier = () -> {
+    sendInitialEventCalls++;
+    return null;
+  };
+
+  private Subscriber<String, String> subscriber = new Subscriber<>(nullSupplier) {
     @Override
-    protected Subscription observeInputs() {
+    protected Subscription observeInputs(Emitter<String> emitter) {
       observeInputsCalls++;
 
       return () -> unsubscribeCalls++;
     }
-
-    @Override
-    protected void sendInitialEvent(Consumer<? super String> observer) {
-      sendInitialEventCalls++;
-    }
   };
 
-  private int observeInputsCalls;
-  private int unsubscribeCalls;
-  private int sendInitialEventCalls;
+  private BaseObservableStream<String> stream = new BaseObservableStream<>(subscriber, true) {};
 
   @Nested
   class WhenObserverAdded {
@@ -38,6 +41,7 @@ public class BaseObservableStreamTest {
 
     {
       stream.addObserver(observer);
+      strings.drain();
     }
 
     @Test
@@ -56,6 +60,7 @@ public class BaseObservableStreamTest {
     class AndSameObserverIsAddedAgain {
       {
         stream.addObserver(observer);
+        strings.drain();
       }
 
       @Test

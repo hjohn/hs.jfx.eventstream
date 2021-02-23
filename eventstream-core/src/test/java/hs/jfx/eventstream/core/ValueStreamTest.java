@@ -1,5 +1,6 @@
 package hs.jfx.eventstream.core;
 
+import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.util.Sink;
@@ -63,6 +64,42 @@ public class ValueStreamTest {
     stream.subscribe(sink::add);
 
     assertEquals(List.of("Hello"), sink.drain());
+  }
+
+  @Test
+  void getCurrentValueShouldReturnValueOfProperty() {
+    property.set("A");
+
+    String result = Values.of(property)
+      .getCurrentValue()
+      .orElse(null);
+
+    assertEquals("A", result);
+  }
+
+  @Test
+  void getCurrentValueShouldReturnValueBasedOnLastValueStreamAncestor() {
+    property.set("A");
+
+    String result = Values.of(property)
+      .filter(v -> true)  // becomes a ChangeStream
+      .withDefault("X")   // becomes a ValueStream
+      .map(v -> v + "Y")
+      .getCurrentValue()
+      .orElse(null);
+
+    assertEquals("XY", result);
+  }
+
+  @Test
+  void getCurrentValueShouldReturnEmptyWhenStreamIsNotObserving() {
+    property.set("A");
+
+    OptionalValue<String> result = Values.of(property)
+      .conditionOn(new SimpleBooleanProperty(false))
+      .getCurrentValue();
+
+    assertFalse(result.isPresent());
   }
 
   @Nested
