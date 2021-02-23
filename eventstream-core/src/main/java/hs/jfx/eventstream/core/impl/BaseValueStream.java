@@ -26,8 +26,8 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
   }
 
   @Override
-  public ChangeStream<T> filter(Predicate<? super T> filter) {
-    return new FilterStream<>(this, filter);
+  public ChangeStream<T> filter(Predicate<? super T> predicate) {
+    return new FilterStream<>(this, predicate);
   }
 
   @Override
@@ -68,8 +68,8 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
   }
 
   @Override
-  public ValueStream<T> orElse(T value) {
-    return new MapStream.Value<>(this, Function.identity(), () -> value);
+  public ValueStream<T> orElseGet(Supplier<? extends T> valueSupplier) {
+    return new MapStream.Value<>(this, Function.identity(), valueSupplier);
   }
 
   @Override

@@ -22,18 +22,102 @@ import javafx.beans.value.ObservableValue;
  * stream emits {@code null}, unless otherwise specified.<p>
  *
  * This is a lazy stream, which means that it only observes its source
- * when it has observers of its own.  When there are no subscribers,
+ * when it has observers of its own. When there are no subscribers,
  * this stream stop observing its source immediately.
  *
  * @param <T> the type of values the stream emits
  */
 public interface ValueStream<T> extends ObservableStream<T> {
 
-  ChangeStream<T> filter(Predicate<? super T> filter);
+  /**
+   * Returns a {@link ChangeStream}, using this stream as its source,
+   * which only emits values matching the given predicate.<p>
+   *
+   * This function is null safe and the predicate will not be called when the stream
+   * emits {@code null}.
+   *
+   * @param predicate a {@link Predicate} which values must match to be emitted, cannot be null
+   * @return a {@link ChangeStream} which only emits values matching the given predicate, never null
+   */
+  ChangeStream<T> filter(Predicate<? super T> predicate);
 
+  /**
+   * Returns a {@link ValueStream} which emits the same values as this stream and,
+   * each time this stream emits a value, calls the given {@code sideEffect}
+   * consumer with the value.<p>
+   *
+   * Note that this function is not null safe and the value supplied can be {@code null}
+   * if the stream emits it.
+   *
+   * @return a {@link ValueStream} which emits the same values as this stream and calls the given {@code sideEffect}
+   *         consumer with each value, never null
+   */
+  ValueStream<T> peek(Consumer<? super T> sideEffect);
+
+  /**
+   * Returns a {@link ValueStream}, using this stream as its source,
+   * which emits values from this stream unless the value was
+   * <code>null</code> in which case it emits values from the supplied stream
+   * until a new value is emitted from this stream.
+   *
+   * @param supplier a {@link Supplier} supplying an alternative stream when this stream emitted <code>null</code>, cannot be null
+   * @return a {@link ValueStream} which emits values from this stream unless the value was <code>null</code>
+   *         in which case it emits values from the supplied stream, never null
+   */
+  ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier);
+
+  /**
+   * Returns a {@link ValueStream}, using this stream as its source,
+   * which emits values from this stream but with <code>null</code>s
+   * replaced with the given value.
+   *
+   * @param value a value to emit instead of <code>null</code>, can be <code>null</code>
+   * @return a {@link ValueStream} with <code>null</code>s replaced with the given value, never null
+   */
+  default ValueStream<T> orElse(T value) {
+    return orElseGet(() -> value);
+  }
+
+  /**
+   * Returns a {@link ValueStream}, using this stream as its source,
+   * which emits the same values as its source but with <code>null</code>s
+   * replaced with the value supplied by the given {@link Supplier}.
+   *
+   * @param valueSupplier a {@link Supplier} which supplies the value to emit instead of <code>null</code>
+   * @return a {@link ValueStream} with <code>null</code>s replaced with the value supplied by the given {@link Supplier}, never null
+   */
+  ValueStream<T> orElseGet(Supplier<? extends T> valueSupplier);
+
+  /**
+   * Returns a {@link ValueStream}, using this stream as its source,
+   * which only observes this stream when {@code condition} is {@code true}.
+   * If the condition is {@code null} this is considered to be {@code false}.<p>
+   *
+   * Although similar to {@link #filter(Predicate)}, the condition is not
+   * based on the actual values emitted by the source stream, and as such
+   * the subscription to the source stream can be temporarily suspended when the
+   * condition evaluates to false.<p>
+   *
+   * Note that it is intended behavior that this stream does not supply anything
+   * to new subscribers when the condition is currently {@code false}.
+   *
+   * @param condition a boolean {@link ObservableValue}, cannot be null
+   * @return a {@link ValueStream} which only observes its source stream when {@code condition} is {@code true}, never null
+   */
+  ValueStream<T> conditionOn(ObservableValue<Boolean> condition);
+
+  /**
+   * Returns a {@link ValueStream}, using this stream as its source,
+   * which emits values converted by the given mapper function.<p>
+   *
+   * This function is null safe and the mapper will not be called when the stream
+   * emits {@code null}.
+   *
+   * @param <U> the type of values the new stream emits
+   * @param mapper a {@link Function} which converts a source value to a new value to emit, cannot be null
+   * @return a {@link ValueStream} which emits values converted by the given mapper function, never null
+   */
   <U> ValueStream<U> map(Function<? super T, ? extends U> mapper);
-
-  Binding<T> toBinding();
 
   /**
    * Returns a {@link ValueStream} which, each time this stream emits a value,
@@ -90,7 +174,7 @@ public interface ValueStream<T> extends ObservableStream<T> {
    *        Emits :---4-7---6----5--4-----34--2---5---&gt;
    * </pre>
    *
-   * This function is null safe and will not be called when the stream
+   * This function is null safe and the mapper will not be called when the stream
    * emits {@code null}.
    *
    * @param mapper a {@link Function} which returns an alternative stream for each value this stream emits, cannot be null
@@ -98,51 +182,10 @@ public interface ValueStream<T> extends ObservableStream<T> {
    */
   <U> ChangeStream<U> flatMapToChange(Function<? super T, ? extends ChangeStream<? extends U>> mapper);
 
-  /**
-   * Returns a {@link ValueStream} which emits the same values as this stream and,
-   * each time this stream emits a value, calls the given {@code sideEffect}
-   * consumer with the value.<p>
-   *
-   * Note that this function is not null safe and the value supplied can be {@code null}
-   * if the stream emits it.
-   *
-   * @return a {@link ValueStream} which emits the same values as this stream and calls the given {@code sideEffect}
-   *         consumer with each value, never null
-   */
-  ValueStream<T> peek(Consumer<? super T> sideEffect);
-
-  ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier);
-
-  /**
-   * Returns a {@link ValueStream}, using this stream as its source,
-   * which emits values from this stream but with <code>null</code>s
-   * replaced with the given value.
-   *
-   * @param value a value to emit instead of <code>null</code>, can be <code>null</code>
-   * @return a {@link ValueStream} with <code>null</code>s replaced with the given value, never null
-   */
-  ValueStream<T> orElse(T value);
-
-  /**
-   * Returns a {@link ValueStream}, using this stream as its source,
-   * which only observes this stream when {@code condition} is {@code true}.
-   * If the condition is {@code null} this is considered to be {@code false}.<p>
-   *
-   * Although similar to {@link #filter(Predicate)}, the condition is not
-   * based on the actual values emitted by the source stream, and as such
-   * the subscription to the source stream can be temporarily suspended when the
-   * condition evaluates to false.<p>
-   *
-   * Note that it is intended behavior that this stream does not supply anything
-   * to new subscribers when the condition is currently {@code false}.
-   *
-   * @param condition a boolean {@link ObservableValue}, cannot be null
-   * @return a {@link ValueStream} which only observes its source stream when {@code condition} is {@code true}, never null
-   */
-  ValueStream<T> conditionOn(ObservableValue<Boolean> condition);
-
   // Convienence function...
   <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper);
+
+  Binding<T> toBinding();
 
   /**
    * Returns an {@link OptionalValue} which contained value this stream will supply
