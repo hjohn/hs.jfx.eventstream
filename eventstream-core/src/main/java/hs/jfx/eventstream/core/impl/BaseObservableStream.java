@@ -2,7 +2,9 @@ package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.OptionalValue;
+import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.Subscription;
+import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.util.ListHelper;
 
 import java.util.Iterator;
@@ -12,18 +14,21 @@ import java.util.function.Consumer;
 /**
  * Base class for observable streams.
  *
+ * @param <S> type of values emitted by the source stream (if any)
  * @param <T> type of values emitted by this stream
  */
-public abstract class BaseObservableStream<T> implements ObservableStream<T> {
-  private final Subscriber<?, T> subscriber;
-  private final boolean sendInitialEvent;
+public abstract class BaseObservableStream<S, T> implements ObservableStream<T> {
+  private final ObservableStream<S> source;
+  private final Subscriber<T> subscriber;
+  private final Operator<S, T> operator;
 
   private ListHelper<Consumer<? super T>> observers;
   private Subscription inputSubscription;
 
-  public BaseObservableStream(Subscriber<?, T> subscriber, boolean sendInitialEvent) {
+  public BaseObservableStream(ObservableStream<S> source, Subscriber<T> subscriber, Operator<S, T> operator) {
+    this.source = source;
     this.subscriber = subscriber;
-    this.sendInitialEvent = sendInitialEvent;
+    this.operator = operator;
   }
 
   @Override
@@ -33,11 +38,11 @@ public abstract class BaseObservableStream<T> implements ObservableStream<T> {
     }
 
     if(inputSubscription == null) {
-      inputSubscription = subscriber.observeInputs(this::emit);
+      inputSubscription = subscriber.subscribe(this::emit);
     }
 
-    if(sendInitialEvent) {
-      subscriber.sendInitialEvent(observer);
+    if(operator != null) {
+      sendInitialEvent(observer);
     }
 
     observers = ListHelper.add(observers, observer);
@@ -69,6 +74,14 @@ public abstract class BaseObservableStream<T> implements ObservableStream<T> {
   }
 
   protected final OptionalValue<T> determineCurrentValue() {
-    return subscriber.getCurrentValue();
+    return getCurrentValue();
+  }
+
+  private void sendInitialEvent(Consumer<? super T> observer) {
+    getCurrentValue().ifPresent(observer::accept);
+  }
+
+  private OptionalValue<T> getCurrentValue() {
+    return source == null ? operator.operate(null) : ((ValueStream<S>)source).getCurrentValue().flatMap(operator::operate);
   }
 }

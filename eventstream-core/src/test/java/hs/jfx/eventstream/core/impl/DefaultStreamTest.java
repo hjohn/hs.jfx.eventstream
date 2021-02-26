@@ -1,5 +1,6 @@
 package hs.jfx.eventstream.core.impl;
 
+import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.ChangeSource;
 import hs.jfx.eventstream.core.util.Sink;
 
@@ -10,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultStreamTest {
   private final ChangeSource<String> source = new ChangeSource<>();
-  private final DefaultStream<String> stream = new DefaultStream<>(source, () -> "Default");
+  private final ValueStream<String> stream = DefaultStreams.value(source, () -> "Default");
 
   @Test
   public void shouldEmitDefaultOnSubscribe() {

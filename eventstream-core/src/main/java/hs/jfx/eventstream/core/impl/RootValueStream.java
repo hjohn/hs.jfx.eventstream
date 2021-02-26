@@ -1,9 +1,11 @@
 package hs.jfx.eventstream.core.impl;
 
+import hs.jfx.eventstream.api.Emitter;
+import hs.jfx.eventstream.api.OptionalValue;
+import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javafx.beans.value.ChangeListener;
@@ -24,13 +26,8 @@ public class RootValueStream<T> extends BaseValueStream<T, T> {
     return () -> observable.removeListener(listener);
   }
 
-  private RootValueStream(Function<Emitter<T>, Subscription> subscriber, Supplier<T> defaultValueSupplier) {
-    super(new Subscriber<>(defaultValueSupplier) {
-      @Override
-      public Subscription observeInputs(Emitter<T> emitter) {
-        return subscriber.apply(emitter);
-      }
-    });
+  private RootValueStream(Subscriber<T> subscriber, Supplier<T> defaultValueSupplier) {
+    super(null, subscriber, v -> defaultValueSupplier == null ? OptionalValue.empty() : OptionalValue.of(defaultValueSupplier.get()));
   }
 
   public static <T> ValueStream<T> constant(T value) {

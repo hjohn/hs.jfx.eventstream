@@ -1,6 +1,7 @@
 package hs.jfx.eventstream.core.impl;
 
-import hs.jfx.eventstream.api.Subscription;
+import hs.jfx.eventstream.api.OptionalValue;
+import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.util.List;
@@ -20,19 +21,21 @@ public class BaseObservableStreamTest {
 
   private Supplier<String> nullSupplier = () -> {
     sendInitialEventCalls++;
+
     return null;
   };
 
-  private Subscriber<String, String> subscriber = new Subscriber<>(nullSupplier) {
-    @Override
-    protected Subscription observeInputs(Emitter<String> emitter) {
-      observeInputsCalls++;
+  private Subscriber<String> subscriber = emitter -> {
+    observeInputsCalls++;
 
-      return () -> unsubscribeCalls++;
-    }
+    return () -> unsubscribeCalls++;
   };
 
-  private BaseObservableStream<String> stream = new BaseObservableStream<>(subscriber, true) {};
+  private Operator<String, String> operator = value -> {
+    return OptionalValue.of(nullSupplier.get());
+  };
+
+  private BaseObservableStream<String, String> stream = new BaseObservableStream<>(null, subscriber, operator) {};
 
   @Nested
   class WhenObserverAdded {

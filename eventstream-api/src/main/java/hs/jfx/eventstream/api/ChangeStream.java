@@ -131,10 +131,10 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * an emission:
    * <pre>
    *            Time ---&gt;
-   *       Source :--A---A--B--B--A--A---A--B---------&gt;
+   *       Source :--A---A--B--B--A--A--BA--B---------&gt;
    * Changes of A :-3-4-7---8--7----4-----34---5--56--&gt;
    * Changes of B :-1---6---6----5---8----9---2---5---&gt;
-   *     Tracking :--AAAAAAABBBBBBAAAAAAAAAABBBBBBBBB-&gt;
+   *     Tracking :--AAAAAAABBBBBBAAAAAABAAABBBBBBBBB-&gt;
    *        Emits :---4-7---6----5--4-----34--2---5---&gt;
    * </pre>
    *

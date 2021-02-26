@@ -1,9 +1,8 @@
 package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ChangeStream;
+import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.Subscription;
-
-import java.util.function.Function;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -21,17 +20,12 @@ public class RootChangeStream<T> extends BaseChangeStream<T, T> {
     });
   }
 
-  public static <T> RootChangeStream<T> of(Function<Emitter<T>, Subscription> subscriber) {
+  public static <T> RootChangeStream<T> of(Subscriber<T> subscriber) {
     return new RootChangeStream<>(subscriber);
   }
 
-  private RootChangeStream(Function<Emitter<T>, Subscription> subscriber) {
-    super(new Subscriber<>() {
-      @Override
-      public Subscription observeInputs(Emitter<T> emitter) {
-        return subscriber.apply(emitter);
-      }
-    });
+  private RootChangeStream(Subscriber<T> subscriber) {
+    super(null, subscriber);
   }
 
   @SuppressWarnings("unchecked")

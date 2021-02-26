@@ -1,7 +1,9 @@
 package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ChangeStream;
+import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.OptionalValue;
+import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.util.StreamUtil;
 
@@ -17,22 +19,23 @@ import javafx.beans.value.ObservableValue;
 /**
  * Base class for value streams.
  *
+ * @param <S> type of values emitted by the source stream
  * @param <T> type of values emitted by this stream
  */
-public class BaseValueStream<S, T> extends BaseObservableStream<T> implements ValueStream<T> {
+public class BaseValueStream<S, T> extends BaseObservableStream<S, T> implements ValueStream<T> {
 
-  public BaseValueStream(Subscriber<S, T> subscriber) {
-    super(subscriber, true);
+  public BaseValueStream(ObservableStream<S> source, Subscriber<T> subscriber, Operator<S, T> operator) {
+    super(source, subscriber, operator);
   }
 
   @Override
   public ChangeStream<T> filter(Predicate<? super T> predicate) {
-    return new FilterStream<>(this, predicate);
+    return FilterStreams.change(this, predicate);
   }
 
   @Override
   public <U> ValueStream<U> map(Function<? super T, ? extends U> mapper) {
-    return new MapStream.Value<>(this, mapper, StreamUtil.nullSupplier());
+    return MapStreams.value(this, mapper, StreamUtil.nullSupplier());
   }
 
   @Override
@@ -42,34 +45,34 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
 
   @Override
   public <U> ValueStream<U> flatMap(Function<? super T, ? extends ValueStream<? extends U>> mapper) {
-    return new FlatMapStream.Value<>(this, mapper, () -> RootValueStream.constant(null));
+    return FlatMapStreams.value(this, mapper, () -> RootValueStream.constant(null));
   }
 
   @Override
   public <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper) {
     Objects.requireNonNull(mapper);
 
-    return new FlatMapStream.Value<>(this, v -> RootValueStream.of(mapper.apply(v)), () -> RootValueStream.constant(null));
+    return FlatMapStreams.value(this, v -> RootValueStream.of(mapper.apply(v)), () -> RootValueStream.constant(null));
   }
 
   @Override
   public <U> ChangeStream<U> flatMapToChange(Function<? super T, ? extends ChangeStream<? extends U>> mapper) {
-    return new FlatMapStream.Change<>(this, mapper, RootChangeStream::empty);
+    return FlatMapStreams.change(this, mapper, RootChangeStream::empty);
   }
 
   @Override
   public ValueStream<T> peek(Consumer<? super T> sideEffect) {
-    return new PeekStream.Value<>(this, sideEffect);
+    return PeekStreams.value(this, sideEffect);
   }
 
   @Override
   public ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier) {
-    return new FlatMapStream.Value<>(this, v -> this, supplier);
+    return FlatMapStreams.value(this, v -> this, supplier);
   }
 
   @Override
   public ValueStream<T> orElseGet(Supplier<? extends T> valueSupplier) {
-    return new MapStream.Value<>(this, Function.identity(), valueSupplier);
+    return MapStreams.value(this, Function.identity(), valueSupplier);
   }
 
   @Override
@@ -81,7 +84,7 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
      * flatmapping behavior would return a constant null stream instead of an empty one.
      */
 
-    return new FlatMapStream.Value<>(
+    return FlatMapStreams.value(
       RootValueStream.of(condition),
       c -> c ? this : empty(),
       () -> empty()

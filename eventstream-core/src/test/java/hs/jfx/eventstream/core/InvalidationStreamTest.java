@@ -51,25 +51,29 @@ public class InvalidationStreamTest {
   }
 
   @Nested
-  class ReplaceOperation {
-    private final Sink<String> strings = new Sink<>();
+  class IntermediateOperations {
 
-    @Test
-    void shouldConvertValues() {
-      Invalidations.of(property)
-        .replace(() -> (property.get() == null || property.get().length() == 0) ? "" : "" + (int)property.get().charAt(0))
-        .subscribe(strings::add);
+    @Nested
+    class Replace {
+      private final Sink<String> strings = new Sink<>();
 
-      assertTrue(strings.isEmpty());  // nothing on subscribe
+      @Test
+      void shouldConvertValues() {
+        Invalidations.of(property)
+          .replace(() -> (property.get() == null || property.get().length() == 0) ? "" : "" + (int)property.get().charAt(0))
+          .subscribe(strings::add);
 
-      property.set("A");
+        assertTrue(strings.isEmpty());  // nothing on subscribe
 
-      assertEquals(List.of("65"), strings.drain());
-    }
+        property.set("A");
 
-    @Test
-    void shouldRejectNullSupplier() {
-      assertThrows(NullPointerException.class, () -> Invalidations.of(property).replace(null));
+        assertEquals(List.of("65"), strings.drain());
+      }
+
+      @Test
+      void shouldRejectNullSupplier() {
+        assertThrows(NullPointerException.class, () -> Invalidations.of(property).replace(null));
+      }
     }
   }
 }
