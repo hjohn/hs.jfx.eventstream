@@ -67,7 +67,37 @@ public class BaseValueStream<S, T> extends BaseObservableStream<S, T> implements
 
   @Override
   public ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier) {
-    return FlatMapStreams.value(this, v -> this, supplier);
+
+    /*
+     * When using a flatmap to implement 'or', the source stream is subscribed
+     * twice (once as the source stream and once as the mapped stream). When
+     * the source stream emits null, the mapper switches to the alternative
+     * stream unsubscribing the mapped source stream subscription. However,
+     * this is too late and the mapped subscription will also receive the null,
+     * which it passes on downstream along with current value of the alternative
+     * stream, effectively resulting in the downstream subscribers receiving two
+     * values for one change: the intended value + an (unexpected) null.
+     *
+     * To prevent this, the source stream is not mapped to directly but instead
+     * a derived stream is returned which skips all nulls. Although null is a
+     * valid value for subscribers to receive, in this case skipping the nulls
+     * is fine as the values from the alternative stream are supposed to be used
+     * in that case anyway.
+     */
+
+    return FlatMapStreams.value(this, v -> skipNulls(), supplier);
+  }
+
+  private ValueStream<T> skipNulls() {
+    return new BaseValueStream<>(
+      this,
+      emitter -> subscribe(v -> {
+        if(v != null) {
+          emitter.emit(v);
+        }
+      }),
+      OptionalValue::of
+    );
   }
 
   @Override

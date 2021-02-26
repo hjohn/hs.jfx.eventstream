@@ -386,6 +386,59 @@ public class ValueStreamTest {
     }
 
     @Nested
+    class Or {
+      private StringProperty otherProperty = new SimpleStringProperty("1");
+
+      @Test
+      void shouldReplaceNulls() {
+        Values.of(property)
+          .or(() -> Values.of(otherProperty))
+          .subscribe(strings::add);
+
+        assertEquals("1", strings.single());
+
+        otherProperty.set("2");
+
+        assertEquals("2", strings.single());
+
+        property.set("A");
+
+        assertEquals("A", strings.single());
+
+        otherProperty.set("3");
+
+        assertEquals(List.of(), strings.drain());
+
+        property.set(null);
+
+        assertEquals("3", strings.single());
+      }
+
+      @Test
+      void shouldAllowReplaceWithNull() {
+        Values.of(property)
+          .or(() -> Values.of(otherProperty))
+          .orElse("Third Alternative")
+          .subscribe(strings::add);
+
+        assertEquals("1", strings.single());
+
+        otherProperty.set("2");
+
+        assertEquals("2", strings.single());
+
+        otherProperty.set(null);
+
+        assertEquals("Third Alternative", strings.single());
+      }
+
+      @Test
+      void shouldRejectNullSupplier() {
+        assertThrows(NullPointerException.class, () -> Values.of(property).or(null));
+      }
+    }
+
+    @Nested
     class OrElse {
 
       @Test
