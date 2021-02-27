@@ -4,7 +4,6 @@ import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.ValueStream;
-import hs.jfx.eventstream.core.util.StreamUtil;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -38,7 +37,7 @@ public class BaseChangeStream<S, T> extends BaseObservableStream<S, T> implement
 
   @Override
   public <U> ChangeStream<U> map(Function<? super T, ? extends U> mapper) {
-    return MapStreams.change(this, mapper, StreamUtil.nullSupplier());
+    return MapStreams.change(this, mapper, () -> null);
   }
 
   @Override
