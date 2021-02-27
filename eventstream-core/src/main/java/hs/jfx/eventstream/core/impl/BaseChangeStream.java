@@ -51,13 +51,6 @@ public class BaseChangeStream<S, T> extends BaseObservableStream<S, T> implement
   }
 
   @Override
-  public ChangeStream<T> or(Supplier<? extends ChangeStream<? extends T>> supplier) {
-    Objects.requireNonNull(supplier);
-
-    return FlatMapStreams.change(this, v -> this, supplier);
-  }
-
-  @Override
   public ChangeStream<T> orElseGet(Supplier<? extends T> valueSupplier) {
     return MapStreams.change(this, Function.identity(), valueSupplier);
   }

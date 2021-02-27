@@ -55,18 +55,6 @@ public interface ChangeStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
-   * which emits values from this stream unless the value was
-   * <code>null</code> in which case it emits values from the supplied stream
-   * until a new value is emitted from this stream.
-   *
-   * @param supplier a {@link Supplier} supplying an alternative stream when this stream emitted <code>null</code>, cannot be null
-   * @return a {@link ChangeStream} which emits values from this stream unless the value was <code>null</code>
-   *         in which case it emits values from the supplied stream, never null
-   */
-  ChangeStream<T> or(Supplier<? extends ChangeStream<? extends T>> supplier);
-
-  /**
-   * Returns a {@link ChangeStream}, using this stream as its source,
    * which emits values from this stream but with <code>null</code>s
    * replaced with the given value.
    *
