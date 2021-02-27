@@ -56,40 +56,6 @@ public interface ValueStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ValueStream}, using this stream as its source,
-   * which emits values from this stream unless the value was
-   * <code>null</code> in which case it emits values from the supplied stream
-   * until a new value is emitted from this stream.
-   *
-   * @param supplier a {@link Supplier} supplying an alternative stream when this stream emitted <code>null</code>, cannot be null
-   * @return a {@link ValueStream} which emits values from this stream unless the value was <code>null</code>
-   *         in which case it emits values from the supplied stream, never null
-   */
-  ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier);
-
-  /**
-   * Returns a {@link ValueStream}, using this stream as its source,
-   * which emits values from this stream but with <code>null</code>s
-   * replaced with the given value.
-   *
-   * @param value a value to emit instead of <code>null</code>, can be <code>null</code>
-   * @return a {@link ValueStream} with <code>null</code>s replaced with the given value, never null
-   */
-  default ValueStream<T> orElse(T value) {
-    return orElseGet(() -> value);
-  }
-
-  /**
-   * Returns a {@link ValueStream}, using this stream as its source,
-   * which emits the same values as its source but with <code>null</code>s
-   * replaced with the value supplied by the given {@link Supplier}.
-   *
-   * @param valueSupplier a {@link Supplier} which supplies the value to emit instead of <code>null</code>
-   * @return a {@link ValueStream} with <code>null</code>s replaced with the value supplied by the given {@link Supplier}, never null
-   */
-  ValueStream<T> orElseGet(Supplier<? extends T> valueSupplier);
-
-  /**
-   * Returns a {@link ValueStream}, using this stream as its source,
    * which only observes this stream when {@code condition} is {@code true}.
    * If the condition is {@code null} this is considered to be {@code false}.<p>
    *
@@ -182,10 +148,42 @@ public interface ValueStream<T> extends ObservableStream<T> {
    */
   <U> ChangeStream<U> flatMapToChange(Function<? super T, ? extends ChangeStream<? extends U>> mapper);
 
+  /**
+   * Returns a {@link ValueStream}, using this stream as its source,
+   * which emits values from this stream but with <code>null</code>s
+   * replaced with the given value.
+   *
+   * @param value a value to emit instead of <code>null</code>, can be <code>null</code>
+   * @return a {@link ValueStream} with <code>null</code>s replaced with the given value, never null
+   */
+  default ValueStream<T> orElse(T value) {
+    return orElseGet(() -> value);
+  }
+
+  /**
+   * Returns a {@link ValueStream}, using this stream as its source,
+   * which emits the same values as its source but with <code>null</code>s
+   * replaced with the value supplied by the given {@link Supplier}.
+   *
+   * @param valueSupplier a {@link Supplier} which supplies the value to emit instead of <code>null</code>
+   * @return a {@link ValueStream} with <code>null</code>s replaced with the value supplied by the given {@link Supplier}, never null
+   */
+  ValueStream<T> orElseGet(Supplier<? extends T> valueSupplier);
+
+  /**
+   * Returns a {@link ValueStream}, using this stream as its source,
+   * which emits values from this stream unless the value was
+   * <code>null</code> in which case it emits values from the supplied stream
+   * until a new value is emitted from this stream.
+   *
+   * @param supplier a {@link Supplier} supplying an alternative stream when this stream emitted <code>null</code>, cannot be null
+   * @return a {@link ValueStream} which emits values from this stream unless the value was <code>null</code>
+   *         in which case it emits values from the supplied stream, never null
+   */
+  ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier);
+
   // Convienence function...
   <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper);
-
-  Binding<T> toBinding();
 
   /**
    * Returns an {@link EventStream}, using this stream as its source,
@@ -194,6 +192,13 @@ public interface ValueStream<T> extends ObservableStream<T> {
    * @return an {@link EventStream}  which emits the same values as this stream but skips {@code null}s, never null
    */
   EventStream<T> filterNull();
+
+  /**
+   * Returns the values of this stream as a {@link Binding}.
+   *
+   * @return the values of this stream as a {@link Binding}, never null
+   */
+  Binding<T> toBinding();
 
   /**
    * Returns an {@link OptionalValue} which contained value this stream will supply

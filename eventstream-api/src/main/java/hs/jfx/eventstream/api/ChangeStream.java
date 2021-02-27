@@ -55,28 +55,6 @@ public interface ChangeStream<T> extends ObservableStream<T> {
 
   /**
    * Returns a {@link ChangeStream}, using this stream as its source,
-   * which emits values from this stream but with <code>null</code>s
-   * replaced with the given value.
-   *
-   * @param value a value to emit instead of <code>null</code>, can be <code>null</code>
-   * @return a {@link ChangeStream} with <code>null</code>s replaced with the given value, never null
-   */
-  default ChangeStream<T> orElse(T value) {
-    return orElseGet(() -> value);
-  }
-
-  /**
-   * Returns a {@link ChangeStream}, using this stream as its source,
-   * which emits the same values as its source but with <code>null</code>s
-   * replaced with the value supplied by the given {@link Supplier}.
-   *
-   * @param valueSupplier a {@link Supplier} which supplies the value to emit instead of <code>null</code>
-   * @return a {@link ChangeStream} with <code>null</code>s replaced with the value supplied by the given {@link Supplier}, never null
-   */
-  ChangeStream<T> orElseGet(Supplier<? extends T> valueSupplier);
-
-  /**
-   * Returns a {@link ChangeStream}, using this stream as its source,
    * which only observes this stream when {@code condition} is {@code true}.
    * If the condition is {@code null} this is considered to be {@code false}.<p>
    *
@@ -154,6 +132,28 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @return a {@link ValueStream} which uses the given defaultValueSupplier to provide its default value, never null
    */
   ValueStream<T> withDefaultGet(Supplier<? extends T> defaultValueSupplier);
+
+  /**
+   * Returns a {@link ChangeStream}, using this stream as its source,
+   * which emits values from this stream but with <code>null</code>s
+   * replaced with the given value.
+   *
+   * @param value a value to emit instead of <code>null</code>, can be <code>null</code>
+   * @return a {@link ChangeStream} with <code>null</code>s replaced with the given value, never null
+   */
+  default ChangeStream<T> orElse(T value) {
+    return orElseGet(() -> value);
+  }
+
+  /**
+   * Returns a {@link ChangeStream}, using this stream as its source,
+   * which emits the same values as its source but with <code>null</code>s
+   * replaced with the value supplied by the given {@link Supplier}.
+   *
+   * @param valueSupplier a {@link Supplier} which supplies the value to emit instead of <code>null</code>
+   * @return a {@link ChangeStream} with <code>null</code>s replaced with the value supplied by the given {@link Supplier}, never null
+   */
+  ChangeStream<T> orElseGet(Supplier<? extends T> valueSupplier);
 
   /**
    * Returns an {@link EventStream}, using this stream as its source,
