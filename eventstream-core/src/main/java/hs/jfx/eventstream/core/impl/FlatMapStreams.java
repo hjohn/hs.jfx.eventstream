@@ -2,6 +2,7 @@ package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.Emitter;
+import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.Subscription;
@@ -12,6 +13,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class FlatMapStreams {
+
+  public static <S, T> EventStream<T> event(ObservableStream<S> source, Function<? super S, ? extends EventStream<? extends T>> mapper) {
+    Function<? super S, ObservableStream<? extends T>> flatMapper = flatMapper(Objects.requireNonNull(mapper), () -> null);
+    Subscriber<T> subscriber = subscriber(source, flatMapper);
+
+    return new BaseEventStream<>(source, subscriber);
+  }
 
   public static <S, T> ChangeStream<T> change(ObservableStream<S> source, Function<? super S, ? extends ChangeStream<? extends T>> mapper, Supplier<? extends ChangeStream<? extends T>> nullReplacement) {
     Function<? super S, ObservableStream<? extends T>> flatMapper = flatMapper(Objects.requireNonNull(mapper), Objects.requireNonNull(nullReplacement));

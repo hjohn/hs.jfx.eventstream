@@ -1,10 +1,8 @@
 package hs.jfx.eventstream.core;
 
-import hs.jfx.eventstream.api.ChangeStream;
+import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.core.util.Sink;
-
-import java.util.List;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -13,17 +11,16 @@ import javafx.beans.value.ChangeListener;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ChangesTest {
+class EventsTest {
   private final StringProperty property = new SimpleStringProperty("A");
 
   @Nested
-  class WhenEmptyCalledReturnsChangeStreamWhich {
-    private final ChangeStream<String> stream = Changes.empty();
+  class WhenEmptyCalledReturnsEventStreamWhich {
+    private final EventStream<Change<String>> stream = Events.empty();
 
     @Test
     void shouldNotBeNull() {
@@ -32,7 +29,7 @@ public class ChangesTest {
 
     @Nested
     class WhenSubscribedReturnsSubscriptionWhich {
-      private final Sink<String> sink = new Sink<>();
+      private final Sink<Change<String>> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
       @Test
@@ -43,8 +40,8 @@ public class ChangesTest {
   }
 
   @Nested
-  class WhenOfCalledWithObservableValueReturnsChangeStreamWhich {
-    private final ChangeStream<String> stream = Changes.of(property);
+  class WhenOfCalledWithObservableValueReturnsEventStreamWhich {
+    private final EventStream<Change<String>> stream = Events.of(property);
 
     @Test
     void shouldNotBeNull() {
@@ -53,7 +50,7 @@ public class ChangesTest {
 
     @Nested
     class WhenSubscribedReturnsSubscriptionWhich {
-      private final Sink<String> sink = new Sink<>();
+      private final Sink<Change<String>> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
       @Test
@@ -65,7 +62,10 @@ public class ChangesTest {
       void shouldReceiveChanges() {
         property.set("B");
 
-        assertEquals(List.of("B"), sink.drain());
+        Change<String> change = sink.single();
+
+        assertEquals("A", change.getOldValue());
+        assertEquals("B", change.getValue());
       }
 
       @Nested
@@ -85,8 +85,8 @@ public class ChangesTest {
   }
 
   @Nested
-  class WhenOfCalledWithSubscriberReturnsChangeStreamWhich {
-    private final ChangeStream<String> stream = Changes.of(emitter -> {
+  class WhenOfCalledWithSubscriberReturnsEventStreamWhich {
+    private final EventStream<String> stream = Events.of(emitter -> {
       ChangeListener<String> listener = (obs, old, current) -> emitter.emit(current);
 
       property.addListener(listener);
@@ -117,10 +117,10 @@ public class ChangesTest {
       }
 
       @Test
-      void shouldAllowNullValue() {
+      void shouldSkipNullValue() {  // as per contract of event streams
         property.set(null);
 
-        assertNull(sink.single());
+        assertTrue(sink.isEmpty());
       }
 
       @Nested

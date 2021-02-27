@@ -2,6 +2,7 @@ package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.Emitter;
+import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscriber;
@@ -12,6 +13,10 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class PeekStreams {
+
+  public static <T> EventStream<T> event(ObservableStream<T> source, Consumer<? super T> sideEffect) {
+    return new BaseEventStream<>(source, subscriber(source, Objects.requireNonNull(sideEffect)));
+  }
 
   public static <T> ChangeStream<T> change(ObservableStream<T> source, Consumer<? super T> sideEffect) {
     return new BaseChangeStream<>(source, subscriber(source, Objects.requireNonNull(sideEffect)));

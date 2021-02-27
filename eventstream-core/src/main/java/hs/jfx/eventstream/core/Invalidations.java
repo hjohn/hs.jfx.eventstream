@@ -1,7 +1,7 @@
 package hs.jfx.eventstream.core;
 
-import hs.jfx.eventstream.api.InvalidationStream;
-import hs.jfx.eventstream.core.impl.BaseInvalidationStream;
+import hs.jfx.eventstream.api.EventStream;
+import hs.jfx.eventstream.core.impl.BaseEventStream;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,19 +10,20 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 
 /**
- * Constructs {@link InvalidationStream}s.
+ * Constructs {@link EventStream}s for invalidations.
  */
 public interface Invalidations {
 
   /**
-   * Creates a stream that emits an impulse on every invalidation of the given observables.
+   * Constructs an {@link EventStream} from the given {@link Observable}s which emits an event
+   * with the {@link Observable} which was invalidated as value.
    *
-   * @param observables zero or more observables which serve as an invalidation source for the new stream
-   * @return a stream that emits an impulse for each invalidation of the given {@code Observable}s for every subscriber, never null
+   * @param observables zero or more observables which serve as an invalidation source for the new stream, cannot be null
+   * @return an {@link EventStream} which emits an event when one of the given observables is invalidated, never null
    */
-  static InvalidationStream of(Observable... observables) {
-    return new BaseInvalidationStream(null, emitter -> {
-      InvalidationListener listener = obs -> emitter.emit(null);
+  static EventStream<Observable> of(Observable... observables) {
+    return new BaseEventStream<>(null, emitter -> {
+      InvalidationListener listener = obs -> emitter.emit(obs);
       List<Observable> copy = List.copyOf(Arrays.asList(observables));
 
       for(Observable observable : copy) {

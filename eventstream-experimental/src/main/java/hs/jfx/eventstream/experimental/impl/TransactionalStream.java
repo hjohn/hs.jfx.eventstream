@@ -6,14 +6,14 @@ import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.core.impl.BaseChangeStream;
-import hs.jfx.eventstream.core.impl.BaseInvalidationStream;
+import hs.jfx.eventstream.core.impl.BaseEventStream;
 import hs.jfx.eventstream.core.impl.BaseValueStream;
 import hs.jfx.eventstream.experimental.Transactions;
 
 public abstract class TransactionalStream {
 
-  public static class Invalidation extends BaseInvalidationStream {
-    public Invalidation(ObservableStream<Void> source) {
+  public static class Event<T> extends BaseEventStream<T, T> {
+    public Event(ObservableStream<T> source) {
       super(source, new TransactionalSubscriber<>(source));
     }
   }
