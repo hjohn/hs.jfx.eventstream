@@ -1,6 +1,7 @@
 package hs.jfx.eventstream.core;
 
 import hs.jfx.eventstream.api.ChangeStream;
+import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.core.impl.RootChangeStream;
 
 import javafx.beans.value.ChangeListener;
@@ -21,6 +22,19 @@ public interface Changes {
    */
   static <T> ChangeStream<T> of(ObservableValue<T> observable) {
     return RootChangeStream.of(observable);
+  }
+
+  /**
+   * Constructs an {@link ChangeStream}, with values of type <code>T</code>, using the given
+   * {@link Subscriber} to subscribe to a source. The returned stream will emit all
+   * values supplied by the subscription.
+   *
+   * @param <T> the type of values emitted by this stream
+   * @param subscriber a {@link Subscriber} supplying the subscription for the stream, cannot be null
+   * @return a {@link ChangeStream} which uses the given {@link Subscriber} to subscribe to a source, never null
+   */
+  static <T> ChangeStream<T> of(Subscriber<T> subscriber) {
+    return RootChangeStream.of(subscriber);
   }
 
   /**
