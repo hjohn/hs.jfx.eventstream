@@ -8,7 +8,7 @@ import javafx.beans.value.ObservableValue;
 /**
  * Constructs {@link ValueStream}s.
  */
-public class Values {
+public interface Values {
 
   /**
    * Constructs a {@link ValueStream}, with values of type <code>T</code>,
@@ -20,7 +20,7 @@ public class Values {
    * @param observable an {@link ObservableValue} used as source for the stream, cannot be null
    * @return a {@link ValueStream} which uses the given {@link ObservableValue} as source, never null
    */
-  public static <T> ValueStream<T> of(ObservableValue<T> observable) {
+  static <T> ValueStream<T> of(ObservableValue<T> observable) {
     return RootValueStream.of(observable);
   }
 
@@ -32,7 +32,7 @@ public class Values {
    * @param value a value to emit upon each subscription
    * @return a {@link ValueStream} which emits the given value exactly once upon each subscription, never null
    */
-  public static <T> ValueStream<T> constant(T value) {
+  static <T> ValueStream<T> constant(T value) {
     return RootValueStream.constant(value);
   }
 }

@@ -9,7 +9,7 @@ import javafx.beans.value.ObservableValue;
 /**
  * Constructs {@link ChangeStream}s.
  */
-public class Changes {
+public interface Changes {
 
   /**
    * Constructs a {@link ChangeStream}, with values of type <code>T</code>, from a given {@link ObservableValue}.
@@ -19,7 +19,7 @@ public class Changes {
    * @param observable an {@link ObservableValue} used as source for the stream, cannot be null
    * @return a {@link ChangeStream} which uses the given {@link ObservableValue} as source, never null
    */
-  public static <T> ChangeStream<T> of(ObservableValue<T> observable) {
+  static <T> ChangeStream<T> of(ObservableValue<T> observable) {
     return RootChangeStream.of(observable);
   }
 
@@ -31,7 +31,7 @@ public class Changes {
    * @param observable an {@link ObservableValue} used as source for the stream, cannot be null
    * @return a {@link ChangeStream} which uses the given {@link ObservableValue} as source, never null
    */
-  public static <T> ChangeStream<Change<T>> diff(ObservableValue<T> observable) {
+  static <T> ChangeStream<Change<T>> diff(ObservableValue<T> observable) {
     return RootChangeStream.of(emitter -> {
       ChangeListener<T> listener = (obs, old, current) -> emitter.emit(Change.of(old, current));
 
@@ -47,7 +47,7 @@ public class Changes {
    * @param <T> the type of values the stream emits
    * @return a {@link ChangeStream} which never emits anything, never null
    */
-  public static <T> ChangeStream<T> empty() {
+  static <T> ChangeStream<T> empty() {
     return RootChangeStream.empty();
   }
 }
