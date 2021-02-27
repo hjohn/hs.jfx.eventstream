@@ -3,6 +3,9 @@ package hs.jfx.eventstream.core;
 import hs.jfx.eventstream.api.InvalidationStream;
 import hs.jfx.eventstream.core.impl.BaseInvalidationStream;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 
@@ -20,13 +23,14 @@ public interface Invalidations {
   static InvalidationStream of(Observable... observables) {
     return new BaseInvalidationStream(null, emitter -> {
       InvalidationListener listener = obs -> emitter.emit(null);
+      List<Observable> copy = List.copyOf(Arrays.asList(observables));
 
-      for(Observable observable : observables) {
+      for(Observable observable : copy) {
         observable.addListener(listener);
       }
 
       return () -> {
-        for(Observable observable : observables) {
+        for(Observable observable : copy) {
           observable.removeListener(listener);
         }
       };
