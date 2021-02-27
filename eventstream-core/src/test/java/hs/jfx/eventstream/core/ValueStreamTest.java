@@ -478,6 +478,50 @@ public class ValueStreamTest {
     }
 
     @Nested
+    class OrElseGet {
+
+      @Test
+      void shouldReplaceNulls() {
+        Values.of(property)
+          .orElseGet(() -> "(null)")
+          .subscribe(strings::add);
+
+        assertEquals("(null)", strings.single());
+
+        property.set("A");
+
+        assertEquals("A", strings.single());
+
+        property.set(null);
+
+        assertEquals("(null)", strings.single());
+      }
+
+      @Test
+      void shouldAllowReplaceWithNull() {
+        Values.of(property)
+          .orElseGet(() -> null)
+          .orElseGet(() -> "(null)")
+          .subscribe(strings::add);
+
+        assertEquals("(null)", strings.single());
+
+        property.set("A");
+
+        assertEquals("A", strings.single());
+
+        property.set(null);
+
+        assertEquals("(null)", strings.single());
+      }
+
+      @Test
+      void shouldRejectNullSupplier() {
+        assertThrows(NullPointerException.class, () -> Values.of(property).orElseGet(null));
+      }
+    }
+
+    @Nested
     class Peek {
 
       @Test

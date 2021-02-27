@@ -155,11 +155,15 @@ public class ChangeStreamTest {
 
       @Test
       void shouldSkipNulls() {
+        property.set("A");
+
         Changes.of(property)
           .filter(TestUtil::filterFailOnNull)
           .subscribe(strings::add);
 
-        assertTrue(strings.isEmpty());
+        property.set(null);
+
+        assertNull(strings.single());  // filter skips null, but subscribe doesn't
       }
 
       @Test
@@ -376,6 +380,50 @@ public class ChangeStreamTest {
         property.set(null);
 
         assertEquals("(null)", strings.single());
+      }
+    }
+
+    @Nested
+    class OrElseGet {
+
+      @Test
+      void shouldReplaceNulls() {
+        Changes.of(property)
+          .orElseGet(() -> "(null)")
+          .subscribe(strings::add);
+
+        assertTrue(strings.isEmpty());
+
+        property.set("A");
+
+        assertEquals("A", strings.single());
+
+        property.set(null);
+
+        assertEquals("(null)", strings.single());
+      }
+
+      @Test
+      void shouldAllowReplaceWithNull() {
+        Changes.of(property)
+          .orElseGet(() -> null)
+          .orElseGet(() -> "(null)")
+          .subscribe(strings::add);
+
+        assertTrue(strings.isEmpty());
+
+        property.set("A");
+
+        assertEquals("A", strings.single());
+
+        property.set(null);
+
+        assertEquals("(null)", strings.single());
+      }
+
+      @Test
+      void shouldRejectNullSupplier() {
+        assertThrows(NullPointerException.class, () -> Changes.of(property).orElseGet(null));
       }
     }
 

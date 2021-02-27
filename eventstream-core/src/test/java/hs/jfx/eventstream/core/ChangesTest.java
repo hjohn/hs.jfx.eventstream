@@ -20,6 +20,27 @@ public class ChangesTest {
   private final StringProperty property = new SimpleStringProperty("A");
 
   @Nested
+  class WhenEmptyCalledReturnsChangeStreamWhich {
+    private final ChangeStream<String> stream = Changes.empty();
+
+    @Test
+    void shouldNotBeNull() {
+      assertNotNull(stream);
+    }
+
+    @Nested
+    class WhenSubscribedReturnsSubscriptionWhich {
+      private final Sink<String> sink = new Sink<>();
+      private final Subscription subscription = stream.subscribe(sink::add);
+
+      @Test
+      void shouldNotBeNull() {
+        assertNotNull(subscription);
+      }
+    }
+  }
+
+  @Nested
   class WhenCallingOfReturnsChangeStreamWhich {
     private final ChangeStream<String> stream = Changes.of(property);
 
