@@ -182,9 +182,6 @@ public interface ValueStream<T> extends ObservableStream<T> {
    */
   ValueStream<T> or(Supplier<? extends ValueStream<? extends T>> supplier);
 
-  // Convienence function...
-  <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper);
-
   /**
    * Returns an {@link EventStream}, using this stream as its source,
    * which emits the same values as this stream but skips {@code null}s.<p>

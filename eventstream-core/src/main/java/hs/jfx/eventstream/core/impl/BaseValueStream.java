@@ -7,7 +7,6 @@ import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.ValueStream;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -51,13 +50,6 @@ public class BaseValueStream<S, T> extends BaseObservableStream<S, T> implements
   @Override
   public <U> ValueStream<U> flatMap(Function<? super T, ? extends ValueStream<? extends U>> mapper) {
     return FlatMapStreams.value(this, mapper, () -> RootValueStream.constant(null));
-  }
-
-  @Override
-  public <U> ValueStream<U> bind(Function<? super T, ObservableValue<? extends U>> mapper) {
-    Objects.requireNonNull(mapper);
-
-    return FlatMapStreams.value(this, v -> RootValueStream.of(mapper.apply(v)), () -> RootValueStream.constant(null));
   }
 
   @Override
