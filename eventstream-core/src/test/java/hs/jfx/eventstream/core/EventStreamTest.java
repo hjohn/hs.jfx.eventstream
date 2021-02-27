@@ -56,6 +56,90 @@ public class EventStreamTest {
 
   @Nested
   class IntermediateOperations {
+    @Nested
+    class ConditionOn {
+
+      @Test
+      void shouldEmitValuesConditionally() {
+        property.set("Bye");
+
+        BooleanProperty visible = new SimpleBooleanProperty(true);
+        EventStream<String> stream = Events.of(property)
+          .map(Change::getValue)
+          .conditionOn(visible);
+
+        stream.subscribe(strings::add);
+
+        assertEquals(List.of(), strings.drain());  // new subscriber gets nothing as this is a ChangeStream
+
+        visible.set(false);
+        property.set("Hello");
+
+        assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is false
+
+        stream.subscribe(strings::add);
+
+        assertEquals(List.of(), strings.drain());  // new subscriber gets nothing as this is a ChangeStream
+
+        visible.set(true);
+        assertEquals(List.of(), strings.drain());  // even though condition is true now, nothing is emitted as ChangeStreams donot emit upon subscription
+
+        property.set("Hi");
+
+        assertEquals(List.of("Hi", "Hi"), strings.drain());  // both subscribers receive new changes while condition is true
+
+        stream.subscribe(strings::add);
+
+        assertEquals(List.of(), strings.drain());  // new subscriber gets nothing as this is a ChangeStream
+
+        property.set("World");
+
+        assertEquals(List.of("World", "World", "World"), strings.drain());  // all subscribers get current value
+      }
+
+      @Test
+      public void shouldNotImmediatelyEmitValuesWhenConditionBecomesTrue() {
+        property.set("Bye");
+
+        BooleanProperty visible = new SimpleBooleanProperty(false);
+        EventStream<String> stream = Events.of(property)
+          .map(Change::getValue)
+          .conditionOn(visible)
+          .map(String::toUpperCase);
+
+        stream.subscribe(strings::add);
+
+        assertEquals(List.of(), strings.drain());
+
+        visible.set(true);
+
+        assertEquals(List.of(), strings.drain());
+      }
+
+      @Test
+      void shouldTreatNullAsFalse() {
+        ObjectProperty<Boolean> visible = new SimpleObjectProperty<>();
+        Events.of(property)
+          .map(Change::getValue)
+          .conditionOn(visible)  // internally, this uses flatMap, which is null safe
+          .subscribe(strings::add);
+
+        visible.set(false);
+        property.set("Hello");
+
+        assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is false
+
+        visible.set(null);
+        property.set("World");
+
+        assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is null
+
+        visible.set(true);
+        property.set("Goodbye");
+
+        assertEquals(List.of("Goodbye"), strings.drain());
+      }
+    }
 
     @Nested
     class Filter {

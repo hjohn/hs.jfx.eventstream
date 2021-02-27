@@ -57,6 +57,10 @@ public class BaseValueStream<S, T> extends BaseObservableStream<S, T> implements
     return FlatMapStreams.change(this, mapper, RootChangeStream::empty);
   }
 
+  public <U> EventStream<U> flatMapToEvent(Function<? super T, ? extends EventStream<? extends U>> mapper) {
+    return FlatMapStreams.event(this, mapper);
+  }
+
   @Override
   public ValueStream<T> peek(Consumer<? super T> sideEffect) {
     return PeekStreams.value(this, sideEffect);

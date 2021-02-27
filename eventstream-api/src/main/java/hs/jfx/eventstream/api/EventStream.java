@@ -45,6 +45,21 @@ public interface EventStream<T> extends ObservableStream<T> {
 
   /**
    * Returns an {@link EventStream}, using this stream as its source,
+   * which only observes this stream when {@code condition} is {@code true}.
+   * If the condition is {@code null} this is considered to be {@code false}.<p>
+   *
+   * Although similar to {@link #filter(Predicate)}, the condition is not
+   * based on the actual values emitted by the source stream, and as such
+   * the subscription to the source stream can be temporarily suspended when the
+   * condition evaluates to false.<p>
+   *
+   * @param condition a boolean {@link ObservableValue}, cannot be null
+   * @return an {@link EventStream} which only observes its source stream when {@code condition} is {@code true}, never null
+   */
+  EventStream<T> conditionOn(ObservableValue<Boolean> condition);
+
+  /**
+   * Returns an {@link EventStream}, using this stream as its source,
    * which emits values converted by the given mapper function.<p>
    *
    * If the mapper maps the event to {@code null}, the event is discarded.

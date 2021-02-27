@@ -48,4 +48,10 @@ public class BaseEventStream<S, T> extends BaseObservableStream<S, T> implements
   public EventStream<T> peek(Consumer<? super T> sideEffect) {
     return PeekStreams.event(this, sideEffect);
   }
+
+  @Override
+  public EventStream<T> conditionOn(ObservableValue<Boolean> condition) {
+    return RootValueStream.of(condition)
+      .flatMapToEvent(c -> c ? this : RootEventStream.empty());
+  }
 }
