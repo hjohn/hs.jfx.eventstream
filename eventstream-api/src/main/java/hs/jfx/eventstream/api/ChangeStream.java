@@ -107,6 +107,7 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * This function is null safe and the mapper will not be called when the stream
    * emits {@code null}.
    *
+   * @param <U> the type of events the alternative stream emits
    * @param mapper a {@link Function} which returns an alternative stream for each value this stream emits, cannot be null
    * @return a {@link ChangeStream} which obtains a new stream supplied by mapper and emits its values instead, never null
    */

@@ -93,6 +93,7 @@ public interface EventStream<T> extends ObservableStream<T> {
    *        Emits :---4-7---6----5--4-----34--2---5---&gt;
    * </pre>
    *
+   * @param <U> the type of events the alternative stream emits
    * @param mapper a {@link Function} which returns an alternative stream for each event this stream emits, cannot be null
    * @return a {@link EventStream} which obtains a new stream supplied by mapper and emits its events instead, never null
    */
