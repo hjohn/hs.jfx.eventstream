@@ -1,6 +1,7 @@
 package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ChangeStream;
+import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.ValueStream;
@@ -28,6 +29,11 @@ public class BaseChangeStream<S, T> extends BaseObservableStream<S, T> implement
   @Override
   public ChangeStream<T> filter(Predicate<? super T> predicate) {
     return FilterStreams.change(this, predicate);
+  }
+
+  @Override
+  public EventStream<T> filterNull() {
+    return FilterNullStreams.event(this);
   }
 
   @Override

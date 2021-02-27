@@ -247,6 +247,27 @@ public class ValueStreamTest {
     }
 
     @Nested
+    class FilterNull {
+
+      @Test
+      void shouldSkipNulls() {
+        Values.of(property)
+          .filterNull()
+          .subscribe(strings::add);
+
+        assertTrue(strings.isEmpty());
+
+        property.set("Hello");
+
+        assertEquals("Hello", strings.single());
+
+        property.set(null);  // doesn't match filter
+
+        assertTrue(strings.isEmpty());
+      }
+    }
+
+    @Nested
     class FlatMap {
       private final Sink<Boolean> booleans = new Sink<>();
 

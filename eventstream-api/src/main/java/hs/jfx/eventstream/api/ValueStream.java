@@ -188,6 +188,14 @@ public interface ValueStream<T> extends ObservableStream<T> {
   Binding<T> toBinding();
 
   /**
+   * Returns an {@link EventStream}, using this stream as its source,
+   * which emits the same values as this stream but skips {@code null}s.<p>
+   *
+   * @return an {@link EventStream}  which emits the same values as this stream but skips {@code null}s, never null
+   */
+  EventStream<T> filterNull();
+
+  /**
    * Returns an {@link OptionalValue} which contained value this stream will supply
    * to new subscribers. If the {@link OptionalValue} is empty, no value will be
    * supplied to new subscribers.<p>

@@ -154,4 +154,12 @@ public interface ChangeStream<T> extends ObservableStream<T> {
    * @return a {@link ValueStream} which uses the given defaultValueSupplier to provide its default value, never null
    */
   ValueStream<T> withDefaultGet(Supplier<? extends T> defaultValueSupplier);
+
+  /**
+   * Returns an {@link EventStream}, using this stream as its source,
+   * which emits the same values as this stream but skips {@code null}s.<p>
+   *
+   * @return an {@link EventStream}  which emits the same values as this stream but skips {@code null}s, never null
+   */
+  EventStream<T> filterNull();
 }
