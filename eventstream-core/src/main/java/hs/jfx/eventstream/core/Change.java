@@ -1,7 +1,5 @@
 package hs.jfx.eventstream.core;
 
-import java.util.Objects;
-
 /**
  * Represents a change of a value, containing the old value and the current value.
  *
@@ -42,25 +40,5 @@ public class Change<T> {
    */
   public T getValue() {
     return currentValue;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(currentValue, oldValue);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if(this == obj) {
-      return true;
-    }
-    if(obj == null || getClass() != obj.getClass()) {
-      return false;
-    }
-
-    Change<?> other = (Change<?>)obj;
-
-    return Objects.equals(currentValue, other.currentValue)
-      && Objects.equals(oldValue, other.oldValue);
   }
 }
