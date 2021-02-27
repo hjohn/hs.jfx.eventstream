@@ -18,7 +18,7 @@ public final class OptionalValue<T> {
 
   /**
    * Creates a new {@link OptionalValue} with the given value as its
-   * value.
+   * value. Accepts {@code null} as a valid value.
    *
    * @param <T> the type of the value that this can contain
    * @param value a value, can be null
@@ -26,6 +26,19 @@ public final class OptionalValue<T> {
    */
   public static <T> OptionalValue<T> of(T value) {
     return new OptionalValue<>(value, true);
+  }
+
+  /**
+   * Creates a new {@link OptionalValue} with the given value as its
+   * value, unless the value was {@code null} in which case an empty
+   * {@link OptionalValue} is returned.
+   *
+   * @param <T> the type of the value that this can contain
+   * @param value a value, can be null
+   * @return a new {@link OptionalValue} instance, never null
+   */
+  public static <T> OptionalValue<T> ofNullable(T value) {
+    return value == null ? OptionalValue.empty() : new OptionalValue<>(value, true);
   }
 
   /**
