@@ -311,23 +311,3 @@ The above binding to `model.selectedItemProperty()` will only be present while `
 showing.  If the list view is hidden, the listener is unregistered, and if it is shown again
 the listener is re-added.  If the UI is hidden, it will instantly stop reacting to any 
 changes in the model and (if also no longer referenced) will eventually be garbage collected.
-
-## Overview
-
-WIP...
-
-Streams distinguish between
-- Stateful streams (ones based on values or with a default value)
-- Stateless streams (ephemeral)
-
-Difference is that a stateful stream will emit a value on subscribe or when a condition 
-operator becomes true again.  This is only possible if a value can be emitted from the
-stream on demand, like values from a property (the property holds the current value can
-be emitted to a new subscriber or when a condition becomes true again).
-
-A stateless stream (like invalidations or changes) does not emit anything upon
-subscription as there is no source that holds a current value.  A stateless stream can
-be made stateful with `withDefaultEvent`.
-
-ReactFX will do this slightly differently; it won't give the default (or current value)
-to a second subscriber of a stream, only to the first.  This can be somewhat confusing.
