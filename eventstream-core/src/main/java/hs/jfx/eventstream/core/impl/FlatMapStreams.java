@@ -4,6 +4,7 @@ import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.Emitter;
 import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.ObservableStream;
+import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
@@ -45,7 +46,7 @@ public abstract class FlatMapStreams {
       @SuppressWarnings("unchecked") // cast is safe as operate is only called for ValueStreams
       BaseValueStream<S, T> mappedStream = (BaseValueStream<S, T>)flatMapper.apply(value);
 
-      return mappedStream.getCurrentValue();
+      return mappedStream == null ? OptionalValue.empty() : mappedStream.getCurrentValue();
     };
   }
 

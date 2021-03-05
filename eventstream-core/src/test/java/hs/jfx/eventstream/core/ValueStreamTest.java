@@ -364,6 +364,17 @@ public class ValueStreamTest {
       }
 
       @Test
+      void shouldDoNothingWhenFlatMappingToNullOnSubscription() {
+        property.set("C");
+
+        Values.of(property)
+          .flatMap(v -> (ValueStream<String>)null)
+          .subscribe(strings::add);
+
+        assertTrue(strings.isEmpty());  // expect nothing, even though this is a value stream -- donot return null from a flatmap if you want proper ValueStream behavior
+      }
+
+      @Test
       void shouldDoNothingWhenFlatMappingToNull() {
         Values.of(property)
           .flatMap(v -> (ValueStream<String>)null)
