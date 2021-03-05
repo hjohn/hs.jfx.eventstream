@@ -38,6 +38,7 @@ public interface EventStream<T> extends ObservableStream<T> {
    * each time this stream emits a value, calls the given {@code sideEffect}
    * consumer with the value.<p>
    *
+   * @param sideEffect a {@link Consumer} called when this stream emits a value, cannot be null
    * @return an {@link EventStream} which emits the same values as this stream and calls the given {@code sideEffect}
    *         consumer with each value, never null
    */

@@ -10,7 +10,7 @@ import javafx.beans.value.ObservableValue;
 public interface Events {
 
   /**
-   * Constructs an {@link EventStream}, with values of type <code>T</code>, from a given {@link ObservableValue}.
+   * Constructs an {@link EventStream}, with values of type <code>Change&lt;T&gt;</code>, from a given {@link ObservableValue}.
    * The returned stream will emit every change of the observable as a {@link Change}.
    *
    * @param <T> the type of values in {@link Change}

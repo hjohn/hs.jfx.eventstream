@@ -49,6 +49,7 @@ public interface ValueStream<T> extends ObservableStream<T> {
    * Note that this function is not null safe and the value supplied can be {@code null}
    * if the stream emits it.
    *
+   * @param sideEffect a {@link Consumer} called when this stream emits a value, cannot be null
    * @return a {@link ValueStream} which emits the same values as this stream and calls the given {@code sideEffect}
    *         consumer with each value, never null
    */

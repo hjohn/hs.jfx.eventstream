@@ -12,8 +12,10 @@ public class Change<T> {
   /**
    * Constructs a new instance with the given values.
    *
-   * @param oldValue a value to use as previous value
-   * @param currentValue a value to use as current value
+   * @param <T> the type of values the change contains
+   * @param old a value to use as previous value
+   * @param current a value to use as current value
+   * @return a new {@link Change} instance, never null
    */
   public static <T> Change<T> of(T old, T current) {
     return new Change<>(old, current);

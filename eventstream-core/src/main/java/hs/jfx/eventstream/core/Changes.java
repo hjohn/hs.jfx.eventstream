@@ -24,7 +24,7 @@ public interface Changes {
   }
 
   /**
-   * Constructs an {@link ChangeStream}, with values of type <code>T</code>, using the given
+   * Constructs a {@link ChangeStream}, with values of type <code>T</code>, using the given
    * {@link Subscriber} to subscribe to a source. The returned stream will emit all
    * values supplied by the subscription.
    *
