@@ -5,12 +5,10 @@ import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.util.ReplaceCamelCaseDisplayNameGenerator;
 import hs.jfx.eventstream.core.util.Sink;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.FloatProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleFloatProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -278,52 +276,6 @@ public class ValuesTest {
         @Test
         void shouldNoLongerReceiveChanges() {
           property.set(1);
-
-          assertTrue(sink.isEmpty());
-        }
-      }
-    }
-  }
-
-  @Nested
-  class WhenOfCalledWith_ObservableBooleanValue_Returns_ValueStream_Which {
-    private final BooleanProperty property = new SimpleBooleanProperty();
-    private final ValueStream<Boolean> stream = Values.of(property);
-
-    @Test
-    void shouldNotBeNull() {
-      assertNotNull(stream);
-    }
-
-    @Nested
-    class WhenSubscribedReturns_Subscription_Which {
-      private final Sink<Boolean> sink = new Sink<>();
-      private final Subscription subscription = stream.subscribe(sink::add);
-
-      @Test
-      void shouldNotBeNull() {
-        assertNotNull(subscription);
-      }
-
-      @Test
-      void shouldReceiveInitialValueFirstAndThenAnyChanges() {
-        assertEquals(false, sink.single());
-
-        property.set(true);
-
-        assertEquals(true, sink.single());
-      }
-
-      @Nested
-      class AfterUnsubscribe {
-        {
-          sink.single();  // clear initial value
-          subscription.unsubscribe();
-        }
-
-        @Test
-        void shouldNoLongerReceiveChanges() {
-          property.set(true);
 
           assertTrue(sink.isEmpty());
         }

@@ -4,7 +4,6 @@ import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.impl.RootValueStream;
 
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.beans.value.ObservableFloatValue;
 import javafx.beans.value.ObservableIntegerValue;
@@ -76,18 +75,6 @@ public interface Values {
    */
   static ValueStream<Double> of(ObservableDoubleValue observable) {
     return withCast(observable, Double.class);
-  }
-
-  /**
-   * Constructs an {@link ValueStream}, with values of type <code>Boolean</code>, from a given {@link ObservableBooleanValue}.
-   * The returned stream will emit the current value of the observable immediately for every subscriber
-   * and then on every change.
-   *
-   * @param observable an {@link ObservableBooleanValue} used as source for the stream, cannot be null
-   * @return a {@link ValueStream} which uses the given {@link ObservableBooleanValue} as source, never null
-   */
-  static ValueStream<Boolean> of(ObservableBooleanValue observable) {
-    return withCast(observable, Boolean.class);
   }
 
   /**
