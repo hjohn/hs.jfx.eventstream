@@ -12,7 +12,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Binding;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 /**
@@ -21,10 +23,15 @@ import javafx.beans.value.ObservableValue;
  * @param <S> type of values emitted by the source stream
  * @param <T> type of values emitted by this stream
  */
-public class BaseValueStream<S, T> extends BaseObservableStream<S, T> implements ValueStream<T> {
+public class BaseValueStream<S, T> extends BaseObservableStream<T> implements ValueStream<T> {
+  private final ObservableStream<S> source;
+  private final Operator<S, T> operator;
 
-  public BaseValueStream(ObservableStream<S> source, Subscriber<T> subscriber, Operator<S, T> operator) {
-    super(source, subscriber, operator);
+  public BaseValueStream(Subscriber<T> subscriber, ObservableStream<S> source, Operator<S, T> operator) {
+    super(subscriber);
+
+    this.source = source;
+    this.operator = operator;
   }
 
   @Override
@@ -91,12 +98,12 @@ public class BaseValueStream<S, T> extends BaseObservableStream<S, T> implements
 
   private ValueStream<T> skipNulls() {
     return new BaseValueStream<>(
-      this,
       emitter -> subscribe(v -> {
         if(v != null) {
           emitter.emit(v);
         }
       }),
+      this,
       OptionalValue::of
     );
   }
@@ -137,6 +144,11 @@ public class BaseValueStream<S, T> extends BaseObservableStream<S, T> implements
 
   @Override
   public OptionalValue<T> getInitialValue() {
-    return determineCurrentValue();
+    return source == null ? operator.operate(null) : ((ValueStream<S>)source).getInitialValue().flatMap(operator::operate);
+  }
+
+  @Override
+  protected void newObserverAdded(Consumer<? super T> observer) {
+    getInitialValue().ifPresent(observer::accept);
   }
 }

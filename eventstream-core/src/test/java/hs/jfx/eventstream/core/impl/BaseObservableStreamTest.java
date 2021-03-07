@@ -1,12 +1,10 @@
 package hs.jfx.eventstream.core.impl;
 
-import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,23 +17,17 @@ public class BaseObservableStreamTest {
   private int observeInputsCalls;
   private int unsubscribeCalls;
 
-  private Supplier<String> nullSupplier = () -> {
-    sendInitialEventCalls++;
-
-    return null;
-  };
-
   private Subscriber<String> subscriber = emitter -> {
     observeInputsCalls++;
 
     return () -> unsubscribeCalls++;
   };
 
-  private Operator<String, String> operator = value -> {
-    return OptionalValue.of(nullSupplier.get());
+  private BaseObservableStream<String> stream = new BaseObservableStream<>(subscriber) {
+    protected void newObserverAdded(java.util.function.Consumer<? super String> observer) {
+      sendInitialEventCalls++;
+    }
   };
-
-  private BaseObservableStream<String, String> stream = new BaseObservableStream<>(null, subscriber, operator) {};
 
   @Nested
   class WhenObserverAdded {

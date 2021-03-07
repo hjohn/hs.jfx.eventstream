@@ -19,14 +19,14 @@ public abstract class FlatMapStreams {
     Function<? super S, ObservableStream<? extends T>> flatMapper = flatMapper(Objects.requireNonNull(mapper), () -> null);
     Subscriber<T> subscriber = subscriber(source, flatMapper);
 
-    return new BaseEventStream<>(source, subscriber);
+    return new BaseEventStream<>(subscriber);
   }
 
   public static <S, T> ChangeStream<T> change(ObservableStream<S> source, Function<? super S, ? extends ChangeStream<? extends T>> mapper, Supplier<? extends ChangeStream<? extends T>> nullReplacement) {
     Function<? super S, ObservableStream<? extends T>> flatMapper = flatMapper(Objects.requireNonNull(mapper), Objects.requireNonNull(nullReplacement));
     Subscriber<T> subscriber = subscriber(source, flatMapper);
 
-    return new BaseChangeStream<>(source, subscriber);
+    return new BaseChangeStream<>(subscriber);
   }
 
   public static <S, T> ValueStream<T> value(ObservableStream<S> source, Function<? super S, ? extends ValueStream<? extends T>> mapper, Supplier<? extends ValueStream<? extends T>> nullReplacement) {
@@ -34,7 +34,7 @@ public abstract class FlatMapStreams {
     Operator<S, T> operator = operator(flatMapper);
     Subscriber<T> subscriber = subscriber(source, flatMapper);
 
-    return new BaseValueStream<>(source, subscriber, operator);
+    return new BaseValueStream<>(subscriber, source, operator);
   }
 
   private static <S, T> Function<? super S, ObservableStream<? extends T>> flatMapper(Function<? super S, ? extends ObservableStream<? extends T>> mapper, Supplier<? extends ObservableStream<? extends T>> nullReplacement) {

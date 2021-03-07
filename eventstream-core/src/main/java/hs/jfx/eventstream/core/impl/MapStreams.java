@@ -17,21 +17,21 @@ public abstract class MapStreams {
     Operator<S, T> operator = nullRejectingOperator(Objects.requireNonNull(mapper));
     Subscriber<T> subscriber = subscriber(source, operator);
 
-    return new BaseEventStream<>(source, subscriber);
+    return new BaseEventStream<>(subscriber);
   }
 
   public static <S, T> ChangeStream<T> change(ObservableStream<S> source, Function<? super S, ? extends T> mapper, Supplier<? extends T> nullReplacement) {
     Operator<S, T> operator = nullSafeOperator(Objects.requireNonNull(mapper), Objects.requireNonNull(nullReplacement));
     Subscriber<T> subscriber = subscriber(source, operator);
 
-    return new BaseChangeStream<>(source, subscriber);
+    return new BaseChangeStream<>(subscriber);
   }
 
   public static <S, T> ValueStream<T> value(ObservableStream<S> source, Function<? super S, ? extends T> mapper, Supplier<? extends T> nullReplacement) {
     Operator<S, T> operator = nullSafeOperator(Objects.requireNonNull(mapper), Objects.requireNonNull(nullReplacement));
     Subscriber<T> subscriber = subscriber(source, operator);
 
-    return new BaseValueStream<>(source, subscriber, operator);
+    return new BaseValueStream<>(subscriber, source, operator);
   }
 
   private static <S, T> Operator<S, T> nullSafeOperator(Function<? super S, ? extends T> mapper, Supplier<? extends T> nullReplacement) {

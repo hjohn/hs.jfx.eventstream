@@ -7,7 +7,7 @@ import hs.jfx.eventstream.api.Subscriber;
 public abstract class FilterNullStreams {
 
   public static <T> EventStream<T> event(ObservableStream<T> source) {
-    return new BaseEventStream<>(source, subscriber(source));
+    return new BaseEventStream<>(subscriber(source));
   }
 
   private static <T> Subscriber<T> subscriber(ObservableStream<T> source) {

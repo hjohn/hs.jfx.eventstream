@@ -31,7 +31,7 @@ public class RootValueStream<T> extends BaseValueStream<T, T> {
   }
 
   private RootValueStream(Subscriber<T> subscriber, Supplier<T> defaultValueSupplier) {
-    super(null, subscriber, v -> defaultValueSupplier == null ? OptionalValue.empty() : OptionalValue.of(defaultValueSupplier.get()));
+    super(subscriber, null, v -> defaultValueSupplier == null ? OptionalValue.empty() : OptionalValue.of(defaultValueSupplier.get()));
   }
 
   public static <T> ValueStream<T> constant(T value) {

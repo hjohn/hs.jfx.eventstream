@@ -25,7 +25,7 @@ public class RootChangeStream<T> extends BaseChangeStream<T, T> {
   }
 
   private RootChangeStream(Subscriber<T> subscriber) {
-    super(null, subscriber);
+    super(subscriber);
   }
 
   @SuppressWarnings("unchecked")

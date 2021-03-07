@@ -14,19 +14,19 @@ public abstract class TransactionalStream {
 
   public static class Event<T> extends BaseEventStream<T, T> {
     public Event(ObservableStream<T> source) {
-      super(source, new TransactionalSubscriber<>(source));
+      super(new TransactionalSubscriber<>(source));
     }
   }
 
   public static class Change<T> extends BaseChangeStream<T, T> {
     public Change(ObservableStream<T> source) {
-      super(source, new TransactionalSubscriber<>(source));
+      super(new TransactionalSubscriber<>(source));
     }
   }
 
   public static class Value<T> extends BaseValueStream<T, T> {
     public Value(ObservableStream<T> source) {
-      super(source, new TransactionalSubscriber<>(source), OptionalValue::of);
+      super(new TransactionalSubscriber<>(source), null, OptionalValue::of);
     }
   }
 

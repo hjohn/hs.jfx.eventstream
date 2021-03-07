@@ -2,7 +2,6 @@ package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.EventStream;
-import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.ValueStream;
 
@@ -19,10 +18,10 @@ import javafx.beans.value.ObservableValue;
  * @param <S> type of values emitted by the source stream
  * @param <T> type of values emitted by this stream
  */
-public class BaseChangeStream<S, T> extends BaseObservableStream<S, T> implements ChangeStream<T> {
+public class BaseChangeStream<S, T> extends BaseObservableStream<T> implements ChangeStream<T> {
 
-  public BaseChangeStream(ObservableStream<S> source, Subscriber<T> subscriber) {
-    super(source, subscriber, null);
+  public BaseChangeStream(Subscriber<T> subscriber) {
+    super(subscriber);
   }
 
   @Override

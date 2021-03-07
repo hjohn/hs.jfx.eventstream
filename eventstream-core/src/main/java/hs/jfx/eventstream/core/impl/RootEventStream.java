@@ -16,7 +16,7 @@ public class RootEventStream<T> extends BaseEventStream<T, T> {
   }
 
   private RootEventStream(Subscriber<T> subscriber) {
-    super(null, subscriber);
+    super(subscriber);
   }
 
   @SuppressWarnings("unchecked")

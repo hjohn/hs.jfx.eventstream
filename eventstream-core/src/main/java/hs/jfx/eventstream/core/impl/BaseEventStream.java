@@ -1,7 +1,6 @@
 package hs.jfx.eventstream.core.impl;
 
 import hs.jfx.eventstream.api.EventStream;
-import hs.jfx.eventstream.api.ObservableStream;
 import hs.jfx.eventstream.api.Subscriber;
 import hs.jfx.eventstream.api.ValueStream;
 
@@ -18,10 +17,10 @@ import javafx.beans.value.ObservableValue;
  * @param <S> type of values emitted by the source stream
  * @param <T> type of values emitted by this stream
  */
-public class BaseEventStream<S, T> extends BaseObservableStream<S, T> implements EventStream<T> {
+public class BaseEventStream<S, T> extends BaseObservableStream<T> implements EventStream<T> {
 
-  public BaseEventStream(ObservableStream<S> source, Subscriber<T> subscriber) {
-    super(source, subscriber, null);
+  public BaseEventStream(Subscriber<T> subscriber) {
+    super(subscriber);
   }
 
   @Override
