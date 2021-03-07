@@ -46,7 +46,7 @@ public abstract class FlatMapStreams {
       @SuppressWarnings("unchecked") // cast is safe as operate is only called for ValueStreams
       BaseValueStream<S, T> mappedStream = (BaseValueStream<S, T>)flatMapper.apply(value);
 
-      return mappedStream == null ? OptionalValue.empty() : mappedStream.getCurrentValue();
+      return mappedStream == null ? OptionalValue.empty() : mappedStream.getInitialValue();
     };
   }
 

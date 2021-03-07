@@ -213,7 +213,7 @@ public interface ValueStream<T> extends ObservableStream<T> {
    * {@link ValueStream}.<p>
    *
    * Example 1:
-   * <pre>Values.of(property).getCurrentValue();</pre>
+   * <pre>Values.of(property).getInitialValue();</pre>
    * Returns the value of {@code property} directly.<p>
    *
    * Example 2:
@@ -222,7 +222,7 @@ public interface ValueStream<T> extends ObservableStream<T> {
    *     .filter(f)         // returns a ChangeStream
    *     .withDefault("X")  // returns a ValueStream
    *     .map(v -> v + "Y")
-   *     .getCurrentValue();
+   *     .getInitialValue();
    * </pre>
    * Returns "XY" because {@code filter} does not result in a {@code ValueStream}. The
    * last ancestor which is a {@code ValueStream} supplies "X", and after mapping this becomes "XY".<p>
@@ -230,5 +230,5 @@ public interface ValueStream<T> extends ObservableStream<T> {
    * @return an {@link OptionalValue} which contained value this stream will supply
    *     to new subscribers, never null
    */
-  OptionalValue<T> getCurrentValue();
+  OptionalValue<T> getInitialValue();
 }

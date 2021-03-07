@@ -71,7 +71,7 @@ public class ValueStreamTest {
     property.set("A");
 
     String result = Values.of(property)
-      .getCurrentValue()
+      .getInitialValue()
       .orElse(null);
 
     assertEquals("A", result);
@@ -85,7 +85,7 @@ public class ValueStreamTest {
       .filter(v -> true)  // becomes a ChangeStream
       .withDefault("X")   // becomes a ValueStream
       .map(v -> v + "Y")
-      .getCurrentValue()
+      .getInitialValue()
       .orElse(null);
 
     assertEquals("XY", result);
@@ -97,7 +97,7 @@ public class ValueStreamTest {
 
     OptionalValue<String> result = Values.of(property)
       .conditionOn(new SimpleBooleanProperty(false))
-      .getCurrentValue();
+      .getInitialValue();
 
     assertFalse(result.isPresent());
   }

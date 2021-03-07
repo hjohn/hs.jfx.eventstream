@@ -82,6 +82,6 @@ public abstract class BaseObservableStream<S, T> implements ObservableStream<T> 
   }
 
   private OptionalValue<T> getCurrentValue() {
-    return source == null ? operator.operate(null) : ((ValueStream<S>)source).getCurrentValue().flatMap(operator::operate);
+    return source == null ? operator.operate(null) : ((ValueStream<S>)source).getInitialValue().flatMap(operator::operate);
   }
 }

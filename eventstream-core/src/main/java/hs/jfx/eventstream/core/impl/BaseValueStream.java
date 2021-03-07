@@ -136,7 +136,7 @@ public class BaseValueStream<S, T> extends BaseObservableStream<S, T> implements
   }
 
   @Override
-  public OptionalValue<T> getCurrentValue() {
+  public OptionalValue<T> getInitialValue() {
     return determineCurrentValue();
   }
 }
