@@ -8,9 +8,7 @@ import java.util.function.Supplier;
 import javafx.beans.value.ObservableValue;
 
 /**
- * A sequence of values supporting aggregate operations. The values
- * emitted from this stream are always a direct result from a change
- * occuring in the source of this stream.<p>
+ * An {@link ObservableStream} which supports aggregate operations.<p>
  *
  * Subscribers will receive changes only when they occur. If no changes
  * occur it is therefore possible that a subscription will never receive
@@ -19,10 +17,6 @@ import javafx.beans.value.ObservableValue;
  * Operations offered by this stream which accept a {@link Function}
  * or {@link Predicate} are all null safe and will not be called when the
  * stream emits {@code null}, unless otherwise specified.<p>
- *
- * This is a lazy stream, which means that it only observes its source
- * when it has observers of its own. When there are no subscribers,
- * this stream stop observing its source immediately.
  *
  * @param <T> the type of values the stream emits
  */

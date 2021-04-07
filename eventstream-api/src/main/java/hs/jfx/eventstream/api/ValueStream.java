@@ -21,10 +21,6 @@ import javafx.beans.value.ObservableValue;
  * or {@link Predicate} are all null safe and will not be called when the
  * stream emits {@code null}, unless otherwise specified.<p>
  *
- * This is a lazy stream, which means that it only observes its source
- * when it has observers of its own. When there are no subscribers,
- * this stream stop observing its source immediately.
- *
  * @param <T> the type of values the stream emits
  */
 public interface ValueStream<T> extends ObservableStream<T> {

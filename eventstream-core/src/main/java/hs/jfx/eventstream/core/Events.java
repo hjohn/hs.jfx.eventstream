@@ -7,6 +7,9 @@ import hs.jfx.eventstream.core.impl.RootEventStream;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
+/**
+ * Constructs {@link EventStream}s.
+ */
 public interface Events {
 
   /**
