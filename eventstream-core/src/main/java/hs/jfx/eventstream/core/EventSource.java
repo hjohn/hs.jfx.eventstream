@@ -18,7 +18,7 @@ public class EventSource<T> extends BaseEventStream<T, T> {
    * Constructs a new instance.
    */
   public EventSource() {
-    super(null, e -> Subscription.EMPTY);
+    super(e -> Subscription.EMPTY);
   }
 
   /**

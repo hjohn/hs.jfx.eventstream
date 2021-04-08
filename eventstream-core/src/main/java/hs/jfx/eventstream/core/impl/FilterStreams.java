@@ -11,11 +11,11 @@ import java.util.function.Predicate;
 public abstract class FilterStreams {
 
   public static <T> EventStream<T> event(ObservableStream<T> source, Predicate<? super T> predicate) {
-    return new BaseEventStream<>(source, subscriber(source, Objects.requireNonNull(predicate)));
+    return new BaseEventStream<>(subscriber(source, Objects.requireNonNull(predicate)));
   }
 
   public static <T> ChangeStream<T> change(ObservableStream<T> source, Predicate<? super T> predicate) {
-    return new BaseChangeStream<>(source, nullSafeSubscriber(source, Objects.requireNonNull(predicate)));
+    return new BaseChangeStream<>(nullSafeSubscriber(source, Objects.requireNonNull(predicate)));
   }
 
   private static <T> Subscriber<T> nullSafeSubscriber(ObservableStream<T> source, Predicate<? super T> predicate) {

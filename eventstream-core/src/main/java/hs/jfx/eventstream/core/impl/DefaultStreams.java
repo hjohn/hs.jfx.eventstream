@@ -12,6 +12,6 @@ public abstract class DefaultStreams {
   public static <T> ValueStream<T> value(ObservableStream<T> source, Supplier<? extends T> defaultValueSupplier) {
     Objects.requireNonNull(defaultValueSupplier);
 
-    return new BaseValueStream<>(null, e -> source.subscribe(e::emit), v -> OptionalValue.of(defaultValueSupplier.get()));
+    return new BaseValueStream<>(e -> source.subscribe(e::emit), null, v -> OptionalValue.of(defaultValueSupplier.get()));
   }
 }

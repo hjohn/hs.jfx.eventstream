@@ -1,7 +1,7 @@
 package hs.jfx.eventstream.core;
 
-import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.Subscription;
+import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.util.ReplaceCamelCaseDisplayNameGenerator;
 import hs.jfx.eventstream.core.util.Sink;
 
@@ -25,12 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayNameGeneration(ReplaceCamelCaseDisplayNameGenerator.class)
-public class ChangesTest {
+public class ValuesTest {
 
   @Nested
-  class WhenOfCalledWith_ObservableValue_Returns_EventStream_Which {
-    private final StringProperty property = new SimpleStringProperty("A");
-    private final EventStream<Change<String>> stream = Changes.of(property);
+  class WhenConstantCalledReturns_ValueStream_Which {
+    private final ValueStream<Integer> stream = Values.constant(42);
 
     @Test
     void shouldNotBeNull() {
@@ -39,7 +38,7 @@ public class ChangesTest {
 
     @Nested
     class WhenSubscribedReturns_Subscription_Which {
-      private final Sink<Change<String>> sink = new Sink<>();
+      private final Sink<Integer> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
       @Test
@@ -48,18 +47,45 @@ public class ChangesTest {
       }
 
       @Test
-      void shouldReceiveChanges() {
+      void shouldImmediatelyReceiveCurrentValue() {
+        assertEquals(42, sink.single());
+      }
+    }
+  }
+
+  @Nested
+  class WhenOfCalledWith_ObservableValue_Returns_ValueStream_Which {
+    private final StringProperty property = new SimpleStringProperty("A");
+    private final ValueStream<String> stream = Values.of(property);
+
+    @Test
+    void shouldNotBeNull() {
+      assertNotNull(stream);
+    }
+
+    @Nested
+    class WhenSubscribedReturns_Subscription_Which {
+      private final Sink<String> sink = new Sink<>();
+      private final Subscription subscription = stream.subscribe(sink::add);
+
+      @Test
+      void shouldNotBeNull() {
+        assertNotNull(subscription);
+      }
+
+      @Test
+      void shouldReceiveInitialValueFirstAndThenAnyChanges() {
+        assertEquals("A", sink.single());
+
         property.set("B");
 
-        Change<String> change = sink.single();
-
-        assertEquals("A", change.getOldValue());
-        assertEquals("B", change.getValue());
+        assertEquals("B", sink.single());
       }
 
       @Nested
       class AfterUnsubscribe {
         {
+          sink.single();  // clear initial value
           subscription.unsubscribe();
         }
 
@@ -74,9 +100,9 @@ public class ChangesTest {
   }
 
   @Nested
-  class WhenOfCalledWith_ObservableIntegerValue_Returns_EventStream_Which {
+  class WhenOfCalledWith_ObservableIntegerValue_Returns_ValueStream_Which {
     private final IntegerProperty property = new SimpleIntegerProperty();
-    private final EventStream<Change<Integer>> stream = Changes.of(property);
+    private final ValueStream<Integer> stream = Values.of(property);
 
     @Test
     void shouldNotBeNull() {
@@ -85,7 +111,7 @@ public class ChangesTest {
 
     @Nested
     class WhenSubscribedReturns_Subscription_Which {
-      private final Sink<Change<Integer>> sink = new Sink<>();
+      private final Sink<Integer> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
       @Test
@@ -94,18 +120,18 @@ public class ChangesTest {
       }
 
       @Test
-      void shouldReceiveChanges() {
+      void shouldReceiveInitialValueFirstAndThenAnyChanges() {
+        assertEquals(0, sink.single());
+
         property.set(Integer.MAX_VALUE);
 
-        Change<Integer> change = sink.single();
-
-        assertEquals(0, change.getOldValue());
-        assertEquals(Integer.MAX_VALUE, change.getValue());
+        assertEquals(Integer.MAX_VALUE, sink.single());
       }
 
       @Nested
       class AfterUnsubscribe {
         {
+          sink.single();  // clear initial value
           subscription.unsubscribe();
         }
 
@@ -120,9 +146,9 @@ public class ChangesTest {
   }
 
   @Nested
-  class WhenOfCalledWith_ObservableLongValue_Returns_EventStream_Which {
+  class WhenOfCalledWith_ObservableLongValue_Returns_ValueStream_Which {
     private final LongProperty property = new SimpleLongProperty();
-    private final EventStream<Change<Long>> stream = Changes.of(property);
+    private final ValueStream<Long> stream = Values.of(property);
 
     @Test
     void shouldNotBeNull() {
@@ -131,7 +157,7 @@ public class ChangesTest {
 
     @Nested
     class WhenSubscribedReturns_Subscription_Which {
-      private final Sink<Change<Long>> sink = new Sink<>();
+      private final Sink<Long> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
       @Test
@@ -140,18 +166,18 @@ public class ChangesTest {
       }
 
       @Test
-      void shouldReceiveChanges() {
+      void shouldReceiveInitialValueFirstAndThenAnyChanges() {
+        assertEquals(0, sink.single());
+
         property.set(Long.MAX_VALUE);
 
-        Change<Long> change = sink.single();
-
-        assertEquals(0, change.getOldValue());
-        assertEquals(Long.MAX_VALUE, change.getValue());
+        assertEquals(Long.MAX_VALUE, sink.single());
       }
 
       @Nested
       class AfterUnsubscribe {
         {
+          sink.single();  // clear initial value
           subscription.unsubscribe();
         }
 
@@ -166,9 +192,9 @@ public class ChangesTest {
   }
 
   @Nested
-  class WhenOfCalledWith_ObservableFloatValue_Returns_EventStream_Which {
+  class WhenOfCalledWith_ObservableFloatValue_Returns_ValueStream_Which {
     private final FloatProperty property = new SimpleFloatProperty();
-    private final EventStream<Change<Float>> stream = Changes.of(property);
+    private final ValueStream<Float> stream = Values.of(property);
 
     @Test
     void shouldNotBeNull() {
@@ -177,7 +203,7 @@ public class ChangesTest {
 
     @Nested
     class WhenSubscribedReturns_Subscription_Which {
-      private final Sink<Change<Float>> sink = new Sink<>();
+      private final Sink<Float> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
       @Test
@@ -186,18 +212,18 @@ public class ChangesTest {
       }
 
       @Test
-      void shouldReceiveChanges() {
+      void shouldReceiveInitialValueFirstAndThenAnyChanges() {
+        assertEquals(0.0f, sink.single());
+
         property.set(1.5f);
 
-        Change<Float> change = sink.single();
-
-        assertEquals(0, change.getOldValue());
-        assertEquals(1.5f, change.getValue());
+        assertEquals(1.5f, sink.single());
       }
 
       @Nested
       class AfterUnsubscribe {
         {
+          sink.single();  // clear initial value
           subscription.unsubscribe();
         }
 
@@ -212,9 +238,9 @@ public class ChangesTest {
   }
 
   @Nested
-  class WhenOfCalledWith_ObservableDoubleValue_Returns_EventStream_Which {
+  class WhenOfCalledWith_ObservableDoubleValue_Returns_ValueStream_Which {
     private final DoubleProperty property = new SimpleDoubleProperty();
-    private final EventStream<Change<Double>> stream = Changes.of(property);
+    private final ValueStream<Double> stream = Values.of(property);
 
     @Test
     void shouldNotBeNull() {
@@ -223,7 +249,7 @@ public class ChangesTest {
 
     @Nested
     class WhenSubscribedReturns_Subscription_Which {
-      private final Sink<Change<Double>> sink = new Sink<>();
+      private final Sink<Double> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
       @Test
@@ -232,18 +258,18 @@ public class ChangesTest {
       }
 
       @Test
-      void shouldReceiveChanges() {
+      void shouldReceiveInitialValueFirstAndThenAnyChanges() {
+        assertEquals(0.0, sink.single());
+
         property.set(1.5);
 
-        Change<Double> change = sink.single();
-
-        assertEquals(0, change.getOldValue());
-        assertEquals(1.5, change.getValue());
+        assertEquals(1.5, sink.single());
       }
 
       @Nested
       class AfterUnsubscribe {
         {
+          sink.single();  // clear initial value
           subscription.unsubscribe();
         }
 

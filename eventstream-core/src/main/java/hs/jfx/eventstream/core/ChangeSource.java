@@ -16,7 +16,7 @@ public class ChangeSource<T> extends BaseChangeStream<T, T> {
    * Constructs a new instance.
    */
   public ChangeSource() {
-    super(null, e -> Subscription.EMPTY);
+    super(e -> Subscription.EMPTY);
   }
 
   /**

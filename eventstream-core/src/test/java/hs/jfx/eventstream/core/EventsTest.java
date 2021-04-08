@@ -2,12 +2,14 @@ package hs.jfx.eventstream.core;
 
 import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.Subscription;
+import hs.jfx.eventstream.core.util.ReplaceCamelCaseDisplayNameGenerator;
 import hs.jfx.eventstream.core.util.Sink;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -15,11 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayNameGeneration(ReplaceCamelCaseDisplayNameGenerator.class)
 class EventsTest {
   private final StringProperty property = new SimpleStringProperty("A");
 
   @Nested
-  class WhenEmptyCalledReturnsEventStreamWhich {
+  class WhenEmptyCalledReturns_EventStream_Which {
     private final EventStream<Change<String>> stream = Events.empty();
 
     @Test
@@ -28,7 +31,7 @@ class EventsTest {
     }
 
     @Nested
-    class WhenSubscribedReturnsSubscriptionWhich {
+    class WhenSubscribedReturns_Subscription_Which {
       private final Sink<Change<String>> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
@@ -40,7 +43,7 @@ class EventsTest {
   }
 
   @Nested
-  class WhenOfCalledWithObservableValueReturnsEventStreamWhich {
+  class WhenOfCalledWith_ObservableValue_Returns_EventStream_Which {
     private final EventStream<Change<String>> stream = Events.of(property);
 
     @Test
@@ -49,7 +52,7 @@ class EventsTest {
     }
 
     @Nested
-    class WhenSubscribedReturnsSubscriptionWhich {
+    class WhenSubscribedReturns_Subscription_Which {
       private final Sink<Change<String>> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
@@ -85,7 +88,7 @@ class EventsTest {
   }
 
   @Nested
-  class WhenOfCalledWithSubscriberReturnsEventStreamWhich {
+  class WhenOfCalledWith_Subscriber_Returns_EventStream_Which {
     private final EventStream<String> stream = Events.of(emitter -> {
       ChangeListener<String> listener = (obs, old, current) -> emitter.emit(current);
 
@@ -100,7 +103,7 @@ class EventsTest {
     }
 
     @Nested
-    class WhenSubscribedReturnsSubscriptionWhich {
+    class WhenSubscribedReturns_Subscription_Which {
       private final Sink<String> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 

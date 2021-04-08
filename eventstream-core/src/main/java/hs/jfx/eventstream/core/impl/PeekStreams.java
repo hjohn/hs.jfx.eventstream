@@ -15,15 +15,15 @@ import java.util.function.Consumer;
 public abstract class PeekStreams {
 
   public static <T> EventStream<T> event(ObservableStream<T> source, Consumer<? super T> sideEffect) {
-    return new BaseEventStream<>(source, subscriber(source, Objects.requireNonNull(sideEffect)));
+    return new BaseEventStream<>(subscriber(source, Objects.requireNonNull(sideEffect)));
   }
 
   public static <T> ChangeStream<T> change(ObservableStream<T> source, Consumer<? super T> sideEffect) {
-    return new BaseChangeStream<>(source, subscriber(source, Objects.requireNonNull(sideEffect)));
+    return new BaseChangeStream<>(subscriber(source, Objects.requireNonNull(sideEffect)));
   }
 
   public static <T> ValueStream<T> value(ObservableStream<T> source, Consumer<? super T> sideEffect) {
-    return new BaseValueStream<>(source, subscriber(source, Objects.requireNonNull(sideEffect)), OptionalValue::of);
+    return new BaseValueStream<>(subscriber(source, Objects.requireNonNull(sideEffect)), source, OptionalValue::of);
   }
 
   private static <T> Subscriber<T> subscriber(ObservableStream<T> source, Consumer<? super T> sideEffect) {

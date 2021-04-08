@@ -3,6 +3,7 @@ package hs.jfx.eventstream.core;
 import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
+import hs.jfx.eventstream.core.impl.RootChangeStream;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -32,19 +33,6 @@ public class ChangeStreamTest {
   private final Sink<String> strings = new Sink<>();
 
   @Nested
-  class Empty {
-
-    @Test
-    void shouldNeverEmitAnything() {
-      ChangeStream<String> stream = Changes.empty();
-
-      stream.subscribe(strings::add);
-
-      assertTrue(strings.isEmpty());
-    }
-  }
-
-  @Nested
   class IntermediateOperations {
     @Nested
     class ConditionOn {
@@ -54,7 +42,7 @@ public class ChangeStreamTest {
         property.set("Bye");
 
         BooleanProperty visible = new SimpleBooleanProperty(true);
-        ChangeStream<String> stream = Changes.of(property)
+        ChangeStream<String> stream = RootChangeStream.of(property)
           .conditionOn(visible);
 
         stream.subscribe(strings::add);
@@ -91,7 +79,7 @@ public class ChangeStreamTest {
         property.set("Bye");
 
         BooleanProperty visible = new SimpleBooleanProperty(false);
-        ChangeStream<String> stream = Changes.of(property)
+        ChangeStream<String> stream = RootChangeStream.of(property)
           .conditionOn(visible)
           .map(String::toUpperCase);
 
@@ -107,7 +95,7 @@ public class ChangeStreamTest {
       @Test
       void shouldTreatNullAsFalse() {
         ObjectProperty<Boolean> visible = new SimpleObjectProperty<>();
-        Changes.of(property)
+        RootChangeStream.of(property)
           .conditionOn(visible)  // internally, this uses flatMap, which is null safe
           .orElse("Boom")
           .subscribe(strings::add);
@@ -134,7 +122,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldSkipFilteredValues() {
-        Changes.of(property)
+        RootChangeStream.of(property)
           .filter(s -> s.contains("o"))
           .subscribe(strings::add);
 
@@ -157,7 +145,7 @@ public class ChangeStreamTest {
       void shouldSkipNulls() {
         property.set("A");
 
-        Changes.of(property)
+        RootChangeStream.of(property)
           .filter(TestUtil::filterFailOnNull)
           .subscribe(strings::add);
 
@@ -177,7 +165,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldSkipNulls() {
-        Changes.of(property)
+        RootChangeStream.of(property)
           .filterNull()
           .subscribe(strings::add);
 
@@ -215,9 +203,9 @@ public class ChangeStreamTest {
         TestScene scene = new TestScene();
         TestWindow window = new TestWindow();
 
-        ChangeStream<Boolean> stream = Changes.of(node.scene)
-          .flatMap(s -> Changes.of(s.window))
-          .flatMap(w -> Changes.of(w.showing));
+        ChangeStream<Boolean> stream = RootChangeStream.of(node.scene)
+          .flatMap(s -> RootChangeStream.of(s.window))
+          .flatMap(w -> RootChangeStream.of(w.showing));
 
         Subscription subscription = stream
           .subscribe(booleans::add);
@@ -300,7 +288,7 @@ public class ChangeStreamTest {
       void shouldSkipNulls() {
         property.set("A");
 
-        Changes.of(property)
+        RootChangeStream.of(property)
           .flatMap(TestUtil::changeFlatMapFailOnNull)
           .subscribe(strings::add);
 
@@ -320,7 +308,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldDoNothingWhenFlatMappingToNull() {
-        Changes.of(property)
+        RootChangeStream.of(property)
           .flatMap(v -> (ChangeStream<String>)null)
           .subscribe(strings::add);
 
@@ -337,7 +325,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldConvertValues() {
-        Changes.of(property)
+        RootChangeStream.of(property)
           .map(s -> "" + (int)s.charAt(0))
           .subscribe(strings::add);
 
@@ -350,7 +338,7 @@ public class ChangeStreamTest {
       void shouldSkipNulls() {
         property.set("A");
 
-        Changes.of(property)
+        RootChangeStream.of(property)
           .map(TestUtil::mapFailOnNull)
           .subscribe(strings::add);
 
@@ -370,7 +358,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldReplaceNulls() {
-        Changes.of(property)
+        RootChangeStream.of(property)
           .orElse("(null)")
           .subscribe(strings::add);
 
@@ -387,7 +375,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldAllowReplaceWithNull() {
-        Changes.of(property)
+        RootChangeStream.of(property)
           .orElse(null)
           .orElse("(null)")
           .subscribe(strings::add);
@@ -409,7 +397,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldReplaceNulls() {
-        Changes.of(property)
+        RootChangeStream.of(property)
           .orElseGet(() -> "(null)")
           .subscribe(strings::add);
 
@@ -426,7 +414,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldAllowReplaceWithNull() {
-        Changes.of(property)
+        RootChangeStream.of(property)
           .orElseGet(() -> null)
           .orElseGet(() -> "(null)")
           .subscribe(strings::add);
@@ -444,7 +432,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldRejectNullSupplier() {
-        assertThrows(NullPointerException.class, () -> Changes.of(property).orElseGet(null));
+        assertThrows(NullPointerException.class, () -> RootChangeStream.of(property).orElseGet(null));
       }
     }
 
@@ -455,7 +443,7 @@ public class ChangeStreamTest {
       void shouldConsumeStreamValues() {
         Sink<String> peekedValues = new Sink<>();
 
-        ChangeStream<String> eventStream = Changes.of(property)
+        ChangeStream<String> eventStream = RootChangeStream.of(property)
           .peek(peekedValues::add);
 
         property.set("Hello");
@@ -489,7 +477,7 @@ public class ChangeStreamTest {
       void shouldNotAllowRecursiveEmission() {
         property.set("Goodbye");
 
-        ChangeStream<String> eventStream = Changes.of(property);
+        ChangeStream<String> eventStream = RootChangeStream.of(property);
 
         Consumer<? super String> sideEffect = s -> {
           if("Hello".equals(s)) {
@@ -525,7 +513,7 @@ public class ChangeStreamTest {
 
         property.set("A");
 
-        Changes.of(property).peek(peekedValues::add).subscribe(strings::add);
+        RootChangeStream.of(property).peek(peekedValues::add).subscribe(strings::add);
 
         property.set(null);
 
@@ -544,7 +532,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldSupplyDefaultToNewSubscribers() {
-        ValueStream<String> eventStream = Changes.of(property)
+        ValueStream<String> eventStream = RootChangeStream.of(property)
           .withDefaultGet(() -> "(null)");
 
         Subscription subscription = eventStream.subscribe(strings::add);
@@ -570,7 +558,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldRejectNullPredicate() {
-        assertThrows(NullPointerException.class, () -> Changes.of(property).withDefaultGet((Supplier<String>)null));
+        assertThrows(NullPointerException.class, () -> RootChangeStream.of(property).withDefaultGet((Supplier<String>)null));
       }
     }
 
@@ -579,7 +567,7 @@ public class ChangeStreamTest {
 
       @Test
       void shouldSupplyDefaultToNewSubscribers() {
-        ValueStream<String> eventStream = Changes.of(property)
+        ValueStream<String> eventStream = RootChangeStream.of(property)
           .withDefault("(null)");
 
         Subscription subscription = eventStream.subscribe(strings::add);

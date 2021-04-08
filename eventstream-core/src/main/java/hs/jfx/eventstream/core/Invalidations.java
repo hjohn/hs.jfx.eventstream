@@ -1,7 +1,7 @@
 package hs.jfx.eventstream.core;
 
 import hs.jfx.eventstream.api.EventStream;
-import hs.jfx.eventstream.core.impl.BaseEventStream;
+import hs.jfx.eventstream.core.impl.RootEventStream;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public interface Invalidations {
    * @return an {@link EventStream} which emits an event when one of the given observables is invalidated, never null
    */
   static EventStream<Observable> of(Observable... observables) {
-    return new BaseEventStream<>(null, emitter -> {
+    return RootEventStream.of(emitter -> {
       InvalidationListener listener = obs -> emitter.emit(obs);
       List<Observable> copy = List.copyOf(Arrays.asList(observables));
 

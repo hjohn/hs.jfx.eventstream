@@ -21,10 +21,6 @@ import javafx.beans.value.ObservableValue;
  * or {@link Predicate} are all null safe and will not be called when the
  * stream emits {@code null}, unless otherwise specified.<p>
  *
- * This is a lazy stream, which means that it only observes its source
- * when it has observers of its own. When there are no subscribers,
- * this stream stop observing its source immediately.
- *
  * @param <T> the type of values the stream emits
  */
 public interface ValueStream<T> extends ObservableStream<T> {
@@ -49,6 +45,7 @@ public interface ValueStream<T> extends ObservableStream<T> {
    * Note that this function is not null safe and the value supplied can be {@code null}
    * if the stream emits it.
    *
+   * @param sideEffect a {@link Consumer} called when this stream emits a value, cannot be null
    * @return a {@link ValueStream} which emits the same values as this stream and calls the given {@code sideEffect}
    *         consumer with each value, never null
    */
@@ -212,7 +209,7 @@ public interface ValueStream<T> extends ObservableStream<T> {
    * {@link ValueStream}.<p>
    *
    * Example 1:
-   * <pre>Values.of(property).getCurrentValue();</pre>
+   * <pre>Values.of(property).getInitialValue();</pre>
    * Returns the value of {@code property} directly.<p>
    *
    * Example 2:
@@ -221,7 +218,7 @@ public interface ValueStream<T> extends ObservableStream<T> {
    *     .filter(f)         // returns a ChangeStream
    *     .withDefault("X")  // returns a ValueStream
    *     .map(v -> v + "Y")
-   *     .getCurrentValue();
+   *     .getInitialValue();
    * </pre>
    * Returns "XY" because {@code filter} does not result in a {@code ValueStream}. The
    * last ancestor which is a {@code ValueStream} supplies "X", and after mapping this becomes "XY".<p>
@@ -229,5 +226,5 @@ public interface ValueStream<T> extends ObservableStream<T> {
    * @return an {@link OptionalValue} which contained value this stream will supply
    *     to new subscribers, never null
    */
-  OptionalValue<T> getCurrentValue();
+  OptionalValue<T> getInitialValue();
 }

@@ -71,7 +71,7 @@ public class ValueStreamTest {
     property.set("A");
 
     String result = Values.of(property)
-      .getCurrentValue()
+      .getInitialValue()
       .orElse(null);
 
     assertEquals("A", result);
@@ -85,7 +85,7 @@ public class ValueStreamTest {
       .filter(v -> true)  // becomes a ChangeStream
       .withDefault("X")   // becomes a ValueStream
       .map(v -> v + "Y")
-      .getCurrentValue()
+      .getInitialValue()
       .orElse(null);
 
     assertEquals("XY", result);
@@ -97,7 +97,7 @@ public class ValueStreamTest {
 
     OptionalValue<String> result = Values.of(property)
       .conditionOn(new SimpleBooleanProperty(false))
-      .getCurrentValue();
+      .getInitialValue();
 
     assertFalse(result.isPresent());
   }
@@ -124,6 +124,8 @@ public class ValueStreamTest {
 
     @Nested
     class ConditionOn {
+      private final Sink<String> strings2 = new Sink<>();
+      private final Sink<String> strings3 = new Sink<>();
 
       @Test
       public void shouldEmitValuesConditionally() {
@@ -138,28 +140,39 @@ public class ValueStreamTest {
         assertEquals(List.of("Bye"), strings.drain());  // expect current value for new subscriber
 
         visible.set(false);
-        property.set("Hello");
 
         assertEquals(List.of(), strings.drain());  // current subscriber gets nothing as condition is false
 
-        stream.subscribe(strings::add);
+        property.set("Hello");
 
-        assertEquals(List.of(), strings.drain());  // new subscriber gets nothing as condition is false
+        assertEquals(List.of(), strings.drain());
+
+        stream.subscribe(strings2::add);
+
+        assertEquals(List.of(), strings.drain());
+        assertEquals(List.of(), strings2.drain());
 
         visible.set(true);
-        assertEquals(List.of("Hello", "Hello"), strings.drain());  // when condition becomes true, both subcribers immediately get notified
+
+        assertEquals(List.of("Hello"), strings.drain());  // when condition becomes true, both subcribers immediately get notified
+        assertEquals(List.of("Hello"), strings2.drain());
 
         property.set("Hi");
 
-        assertEquals(List.of("Hi", "Hi"), strings.drain());  // both subscribers receive new changes while condition is true
+        assertEquals(List.of("Hi"), strings.drain());  // both subscribers receive new changes while condition is true
+        assertEquals(List.of("Hi"), strings2.drain());
 
-        stream.subscribe(strings::add);
+        stream.subscribe(strings3::add);
 
-        assertEquals(List.of("Hi"), strings.drain());  // expect current value for new subscriber
+        assertEquals(List.of(), strings.drain());
+        assertEquals(List.of(), strings2.drain());
+        assertEquals(List.of("Hi"), strings3.drain());  // expect current value for new subscriber
 
         property.set("World");
 
-        assertEquals(List.of("World", "World", "World"), strings.drain());  // all subscribers get current value
+        assertEquals(List.of("World"), strings.drain());  // all subscribers get current value
+        assertEquals(List.of("World"), strings2.drain());
+        assertEquals(List.of("World"), strings3.drain());
       }
 
       @Test
@@ -361,6 +374,17 @@ public class ValueStreamTest {
       @Test
       void shouldRejectNullFunction() {
         assertThrows(NullPointerException.class, () -> Values.of(property).flatMap(null));
+      }
+
+      @Test
+      void shouldDoNothingWhenFlatMappingToNullOnSubscription() {
+        property.set("C");
+
+        Values.of(property)
+          .flatMap(v -> (ValueStream<String>)null)
+          .subscribe(strings::add);
+
+        assertTrue(strings.isEmpty());  // expect nothing, even though this is a value stream -- donot return null from a flatmap if you want proper ValueStream behavior
       }
 
       @Test
