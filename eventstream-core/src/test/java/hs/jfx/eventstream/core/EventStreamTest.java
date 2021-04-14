@@ -34,7 +34,6 @@ public class EventStreamTest {
     property.set("A");
 
     Events.of(property)  // never emits null as it emits Change objects
-      .map(Change::getValue)  // could become null here
       .subscribe(strings::add);
 
     property.set(null);  // try to get it to emit null
@@ -53,7 +52,6 @@ public class EventStreamTest {
 
         BooleanProperty visible = new SimpleBooleanProperty(true);
         EventStream<String> stream = Events.of(property)
-          .map(Change::getValue)
           .conditionOn(visible);
 
         stream.subscribe(strings::add);
@@ -91,7 +89,6 @@ public class EventStreamTest {
 
         BooleanProperty visible = new SimpleBooleanProperty(false);
         EventStream<String> stream = Events.of(property)
-          .map(Change::getValue)
           .conditionOn(visible)
           .map(String::toUpperCase);
 
@@ -108,7 +105,6 @@ public class EventStreamTest {
       void shouldTreatNullAsFalse() {
         ObjectProperty<Boolean> visible = new SimpleObjectProperty<>();
         Events.of(property)
-          .map(Change::getValue)
           .conditionOn(visible)  // internally, this uses flatMap, which is null safe
           .subscribe(strings::add);
 
@@ -132,7 +128,6 @@ public class EventStreamTest {
       void shouldBeUncollectableWhenConditionTrue() {
         BooleanProperty visible = new SimpleBooleanProperty(true);
         EventStream<String> stream = Events.of(property)
-          .map(Change::getValue)
           .conditionOn(visible);
 
         stream.subscribe(strings::add);
@@ -150,7 +145,6 @@ public class EventStreamTest {
       void shouldBeCollectableWhenConditionFalse() {
         BooleanProperty visible = new SimpleBooleanProperty(true);
         EventStream<String> stream = Events.of(property)
-          .map(Change::getValue)
           .conditionOn(visible);
 
         stream.subscribe(strings::add);
@@ -171,7 +165,6 @@ public class EventStreamTest {
       @Test
       void shouldSkipFilteredValues() {
         Events.of(property)
-          .map(Change::getValue)
           .filter(s -> s.contains("o"))
           .subscribe(strings::add);
 
@@ -195,7 +188,6 @@ public class EventStreamTest {
         property.set("A");
 
         Events.of(property)
-          .map(Change::getValue)
           .filter(TestUtil::filterFailOnNull)
           .subscribe(strings::add);
 
@@ -233,9 +225,8 @@ public class EventStreamTest {
         TestWindow window = new TestWindow();
 
         EventStream<Boolean> stream = Events.of(node.scene)
-          .map(Change::getValue)
-          .flatMap(s -> s == null ? null : Events.of(s.window).map(Change::getValue))
-          .flatMap(w -> w == null ? null : Events.of(w.showing).map(Change::getValue));
+          .flatMap(s -> s == null ? null : Events.of(s.window))
+          .flatMap(w -> w == null ? null : Events.of(w.showing));
 
         Subscription subscription = stream
           .subscribe(booleans::add);
@@ -319,7 +310,6 @@ public class EventStreamTest {
         property.set("A");
 
         Events.of(property)
-          .map(Change::getValue)
           .flatMap(TestUtil::eventFlatMapFailOnNull)
           .subscribe(strings::add);
 
@@ -357,7 +347,6 @@ public class EventStreamTest {
       @Test
       void shouldConvertValues() {
         Events.of(property)
-          .map(Change::getValue)
           .map(s -> "" + (int)s.charAt(0))
           .subscribe(strings::add);
 
@@ -371,7 +360,6 @@ public class EventStreamTest {
         property.set("A");
 
         Events.of(property)
-          .map(Change::getValue)
           .map(TestUtil::mapFailOnNull)
           .subscribe(strings::add);
 
@@ -394,7 +382,6 @@ public class EventStreamTest {
         Sink<String> peekedValues = new Sink<>();
 
         EventStream<String> eventStream = Events.of(property)
-          .map(Change::getValue)
           .peek(peekedValues::add);
 
         property.set("Hello");
@@ -428,7 +415,7 @@ public class EventStreamTest {
       void shouldNotAllowRecursiveEmission() {
         property.set("Goodbye");
 
-        EventStream<String> eventStream = Events.of(property).map(Change::getValue);
+        EventStream<String> eventStream = Events.of(property);
 
         Consumer<? super String> sideEffect = s -> {
           if("Hello".equals(s)) {
@@ -464,7 +451,7 @@ public class EventStreamTest {
 
         property.set("A");
 
-        Events.of(property).map(Change::getValue).peek(peekedValues::add).subscribe(strings::add);
+        Events.of(property).peek(peekedValues::add).subscribe(strings::add);
 
         property.set(null);
 
@@ -484,7 +471,6 @@ public class EventStreamTest {
       @Test
       void shouldSupplyDefaultToNewSubscribers() {
         ValueStream<String> eventStream = Events.of(property)
-          .map(Change::getValue)
           .withDefaultGet(() -> "(null)");
 
         Subscription subscription = eventStream.subscribe(strings::add);
@@ -520,7 +506,6 @@ public class EventStreamTest {
       @Test
       void shouldSupplyDefaultToNewSubscribers() {
         ValueStream<String> eventStream = Events.of(property)
-          .map(Change::getValue)
           .withDefault("(null)");
 
         Subscription subscription = eventStream.subscribe(strings::add);

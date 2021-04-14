@@ -23,7 +23,7 @@ class EventsTest {
 
   @Nested
   class WhenOfCalledWith_ObservableValue_Returns_EventStream_Which {
-    private final EventStream<Change<String>> stream = Events.of(property);
+    private final EventStream<String> stream = Events.of(property);
 
     @Test
     void shouldNotBeNull() {
@@ -32,7 +32,7 @@ class EventsTest {
 
     @Nested
     class WhenSubscribedReturns_Subscription_Which {
-      private final Sink<Change<String>> sink = new Sink<>();
+      private final Sink<String> sink = new Sink<>();
       private final Subscription subscription = stream.subscribe(sink::add);
 
       @Test
@@ -44,10 +44,9 @@ class EventsTest {
       void shouldReceiveChanges() {
         property.set("B");
 
-        Change<String> change = sink.single();
+        String value = sink.single();
 
-        assertEquals("A", change.getOldValue());
-        assertEquals("B", change.getValue());
+        assertEquals("B", value);
       }
 
       @Nested
