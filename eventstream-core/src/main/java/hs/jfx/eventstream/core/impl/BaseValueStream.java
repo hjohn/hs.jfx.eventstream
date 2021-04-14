@@ -12,9 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Binding;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
 /**
@@ -61,7 +59,7 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
 
   @Override
   public <U> ChangeStream<U> flatMapToChange(Function<? super T, ? extends ChangeStream<? extends U>> mapper) {
-    return FlatMapStreams.change(this, mapper, RootChangeStream::empty);
+    return FlatMapStreams.change(this, mapper, () -> null);
   }
 
   public <U> EventStream<U> flatMapToEvent(Function<? super T, ? extends EventStream<? extends U>> mapper) {
@@ -124,22 +122,9 @@ public class BaseValueStream<S, T> extends BaseObservableStream<T> implements Va
 
     return FlatMapStreams.value(
       RootValueStream.of(condition),
-      c -> c ? this : empty(),
-      () -> empty()
+      c -> c ? this : null,
+      () -> null
     );
-  }
-
-  /**
-   * Returns a {@link ValueStream} which never emits anything, which goes against
-   * the general contract of a value stream. This is only used for {@link #conditionOn(ObservableValue)}
-   * which documents this behavior.
-   *
-   * @param <T> the type of values the stream emits
-   * @return a {@link ValueStream} which never emits anything, never null
-   */
-  @SuppressWarnings("unchecked")
-  private static <T> ValueStream<T> empty() {
-    return (ValueStream<T>)RootValueStream.EMPTY;
   }
 
   @Override

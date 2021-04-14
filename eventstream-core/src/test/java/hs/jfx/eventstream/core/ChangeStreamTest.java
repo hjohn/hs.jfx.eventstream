@@ -4,6 +4,7 @@ import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
 import hs.jfx.eventstream.core.impl.RootChangeStream;
+import hs.jfx.eventstream.core.util.References;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -114,6 +115,40 @@ public class ChangeStreamTest {
         property.set("Goodbye");
 
         assertEquals(List.of("Goodbye"), strings.drain());
+      }
+
+      @Test
+      void shouldBeUncollectableWhenConditionTrue() {
+        BooleanProperty visible = new SimpleBooleanProperty(true);
+        ChangeStream<String> stream = RootChangeStream.of(property)
+          .conditionOn(visible);
+
+        stream.subscribe(strings::add);
+        visible.set(true);
+
+        AtomicReference<ChangeStream<String>> reference = new AtomicReference<>(stream);
+
+        stream = null;
+        visible = null;
+
+        References.assertUncollectable(reference.get(), () -> { reference.set(null); });
+      }
+
+      @Test
+      void shouldBeCollectableWhenConditionFalse() {
+        BooleanProperty visible = new SimpleBooleanProperty(true);
+        ChangeStream<String> stream = RootChangeStream.of(property)
+          .conditionOn(visible);
+
+        stream.subscribe(strings::add);
+        visible.set(false);
+
+        AtomicReference<ChangeStream<String>> reference = new AtomicReference<>(stream);
+
+        stream = null;
+        visible = null;
+
+        References.assertCollectable(reference.get(), () -> { reference.set(null); });
       }
     }
 

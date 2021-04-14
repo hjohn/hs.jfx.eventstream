@@ -22,27 +22,6 @@ class EventsTest {
   private final StringProperty property = new SimpleStringProperty("A");
 
   @Nested
-  class WhenEmptyCalledReturns_EventStream_Which {
-    private final EventStream<Change<String>> stream = Events.empty();
-
-    @Test
-    void shouldNotBeNull() {
-      assertNotNull(stream);
-    }
-
-    @Nested
-    class WhenSubscribedReturns_Subscription_Which {
-      private final Sink<Change<String>> sink = new Sink<>();
-      private final Subscription subscription = stream.subscribe(sink::add);
-
-      @Test
-      void shouldNotBeNull() {
-        assertNotNull(subscription);
-      }
-    }
-  }
-
-  @Nested
   class WhenOfCalledWith_ObservableValue_Returns_EventStream_Which {
     private final EventStream<Change<String>> stream = Events.of(property);
 

@@ -3,7 +3,6 @@ package hs.jfx.eventstream.core;
 import hs.jfx.eventstream.api.ChangeStream;
 import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.ValueStream;
-import hs.jfx.eventstream.core.impl.RootChangeStream;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -38,7 +37,7 @@ public class TestUtil {
       fail("Null not allowed");
     }
 
-    return RootChangeStream.empty();
+    return null;
   }
 
   public static <T> EventStream<T> eventFlatMapFailOnNull(T input) {
@@ -46,6 +45,6 @@ public class TestUtil {
       fail("Null not allowed");
     }
 
-    return Events.empty();
+    return null;
   }
 }

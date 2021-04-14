@@ -42,14 +42,4 @@ public interface Events {
   static <T> EventStream<T> of(Subscriber<T> subscriber) {
     return RootEventStream.of(subscriber);
   }
-
-  /**
-   * Constructs an empty {@link EventStream} which never emits anything.
-   *
-   * @param <T> the type of values the stream emits
-   * @return an {@link EventStream} which never emits anything, never null
-   */
-  static <T> EventStream<T> empty() {
-    return RootEventStream.empty();
-  }
 }

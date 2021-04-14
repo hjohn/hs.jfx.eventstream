@@ -3,6 +3,7 @@ package hs.jfx.eventstream.core;
 import hs.jfx.eventstream.api.OptionalValue;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
+import hs.jfx.eventstream.core.util.References;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -215,6 +216,40 @@ public class ValueStreamTest {
         visible.set(true);  // this triggers an immediate emit
 
         assertEquals(List.of("World"), strings.drain());
+      }
+
+      @Test
+      void shouldBeUncollectableWhenConditionTrue() {
+        BooleanProperty visible = new SimpleBooleanProperty(true);
+        ValueStream<String> stream = Values.of(property)
+          .conditionOn(visible);
+
+        stream.subscribe(strings::add);
+        visible.set(true);
+
+        AtomicReference<ValueStream<String>> reference = new AtomicReference<>(stream);
+
+        stream = null;
+        visible = null;
+
+        References.assertUncollectable(reference.get(), () -> { reference.set(null); });
+      }
+
+      @Test
+      void shouldBeCollectableWhenConditionFalse() {
+        BooleanProperty visible = new SimpleBooleanProperty(true);
+        ValueStream<String> stream = Values.of(property)
+          .conditionOn(visible);
+
+        stream.subscribe(strings::add);
+        visible.set(false);
+
+        AtomicReference<ValueStream<String>> reference = new AtomicReference<>(stream);
+
+        stream = null;
+        visible = null;
+
+        References.assertCollectable(reference.get(), () -> { reference.set(null); });
       }
     }
 

@@ -51,6 +51,6 @@ public class BaseEventStream<S, T> extends BaseObservableStream<T> implements Ev
   @Override
   public EventStream<T> conditionOn(ObservableValue<Boolean> condition) {
     return RootValueStream.of(condition)
-      .flatMapToEvent(c -> c ? this : RootEventStream.empty());
+      .flatMapToEvent(c -> c ? this : null);
   }
 }

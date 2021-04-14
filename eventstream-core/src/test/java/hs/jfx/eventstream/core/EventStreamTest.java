@@ -3,6 +3,7 @@ package hs.jfx.eventstream.core;
 import hs.jfx.eventstream.api.EventStream;
 import hs.jfx.eventstream.api.Subscription;
 import hs.jfx.eventstream.api.ValueStream;
+import hs.jfx.eventstream.core.util.References;
 import hs.jfx.eventstream.core.util.Sink;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -39,19 +40,6 @@ public class EventStreamTest {
     property.set(null);  // try to get it to emit null
 
     assertTrue(strings.isEmpty());
-  }
-
-  @Nested
-  class Empty {
-
-    @Test
-    void shouldNeverEmitAnything() {
-      EventStream<String> stream = Events.empty();
-
-      stream.subscribe(strings::add);
-
-      assertTrue(strings.isEmpty());
-    }
   }
 
   @Nested
@@ -139,6 +127,42 @@ public class EventStreamTest {
 
         assertEquals(List.of("Goodbye"), strings.drain());
       }
+
+      @Test
+      void shouldBeUncollectableWhenConditionTrue() {
+        BooleanProperty visible = new SimpleBooleanProperty(true);
+        EventStream<String> stream = Events.of(property)
+          .map(Change::getValue)
+          .conditionOn(visible);
+
+        stream.subscribe(strings::add);
+        visible.set(true);
+
+        AtomicReference<EventStream<String>> reference = new AtomicReference<>(stream);
+
+        stream = null;
+        visible = null;
+
+        References.assertUncollectable(reference.get(), () -> { reference.set(null); });
+      }
+
+      @Test
+      void shouldBeCollectableWhenConditionFalse() {
+        BooleanProperty visible = new SimpleBooleanProperty(true);
+        EventStream<String> stream = Events.of(property)
+          .map(Change::getValue)
+          .conditionOn(visible);
+
+        stream.subscribe(strings::add);
+        visible.set(false);
+
+        AtomicReference<EventStream<String>> reference = new AtomicReference<>(stream);
+
+        stream = null;
+        visible = null;
+
+        References.assertCollectable(reference.get(), () -> { reference.set(null); });
+      }
     }
 
     @Nested
@@ -210,8 +234,8 @@ public class EventStreamTest {
 
         EventStream<Boolean> stream = Events.of(node.scene)
           .map(Change::getValue)
-          .flatMap(s -> s == null ? Events.empty() : Events.of(s.window).map(Change::getValue))
-          .flatMap(w -> w == null ? Events.empty() : Events.of(w.showing).map(Change::getValue));
+          .flatMap(s -> s == null ? null : Events.of(s.window).map(Change::getValue))
+          .flatMap(w -> w == null ? null : Events.of(w.showing).map(Change::getValue));
 
         Subscription subscription = stream
           .subscribe(booleans::add);
